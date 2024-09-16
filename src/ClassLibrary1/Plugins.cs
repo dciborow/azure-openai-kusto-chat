@@ -5,7 +5,8 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
     using System.ComponentModel;
     using System.Text.Json;
     using System.Threading.Tasks;
-    using global::Microsoft.SemanticKernel;
+
+    using Microsoft.SemanticKernel;
 
     public class ClearwaterPlugin
     {
@@ -15,10 +16,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         [KernelFunction("help")]
         [Description("Provides help information for the Clearwater plugin.")]
         [return: Description("Returns the help information as a string.")]
-        public string Help()
-        {
-            return "Clearwater Plugin Help: This plugin provides various functions to interact with the 1es Kusto cluster database's AzureDevOps.";
-        }
+        public string Help() => "Clearwater Plugin Help: This plugin provides various functions to interact with the 1es Kusto cluster database's AzureDevOps.";
     }
 
     public class DevOpsPlugin
@@ -144,46 +142,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             // Execute paginated query using the KustoHelper
             var result = await KustoHelper.ExecuteKustoQueryForClusterWithPaginationAsync(cluster.Uri, cluster.DatabaseName, query, paginated, pageSize, pageIndex);
 
-            // Handle large responses by checking token limits
-            if (result.Length > 1048576)  // Example: 1 MB limit
-            {
-                return HandleLargeResponse(result);
-            }
-
             return result ?? "No results found.";
-        }
-
-        /// <summary>
-        /// Handles responses that exceed the token limit by breaking them into chunks and asking the user how to proceed.
-        /// </summary>
-        private string HandleLargeResponse(string response)
-        {
-            const int chunkSize = 1048576 / 2;  // Example chunk size for safe token limits
-            var responseChunks = new List<string>();
-
-            for (int i = 0; i < response.Length; i += chunkSize)
-            {
-                responseChunks.Add(response.Substring(i, Math.Min(chunkSize, response.Length - i)));
-            }
-
-            // Ask the user for input on how to handle large data
-            Console.WriteLine("The response is too large. How would you like to proceed?");
-            Console.WriteLine("1. Return the first chunk");
-            Console.WriteLine("2. Return all chunks in sequence");
-            Console.WriteLine("3. Discard the response");
-
-            var userInput = Console.ReadLine();
-            switch (userInput)
-            {
-                case "1":
-                    return responseChunks[0];
-                case "2":
-                    return string.Join("\n---\n", responseChunks);
-                case "3":
-                    return "Response discarded.";
-                default:
-                    return "Invalid option selected.";
-            }
         }
 
         /// <summary>
@@ -210,103 +169,89 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             return result ?? "No tables found.";
         }
 
-        // Helper method to get cluster by key
-        private KustoClusterConfig? GetClusterByKey(string clusterKey)
+        // Kusto Cluster Config class to store cluster details
+        public class KustoClusterConfig
         {
-            Logger.LogFunctionCall("KustoPlugin.GetClusterByKey", clusterKey);
+            public string Name { get; }
+            public string Uri { get; }
+            public string DatabaseName { get; }
+            public string Description { get; }
 
-            if (_clusters.TryGetValue(clusterKey, out var cluster))
+            public KustoClusterConfig(string name, string uri, string databaseName, string description)
             {
-                return cluster;
+                Name = name;
+                Uri = uri;
+                DatabaseName = databaseName;
+                Description = description;
+            }
+        }
+
+        public class LargeRequestHelper
+        {
+            private readonly int MaxTokenSize = 100000;  // Maximum token size per GPT request
+            private readonly int MaxRowsPerRequest = 500;  // Maximum rows to send in one request
+            private string _fullOutput = string.Empty;  // Buffer to store the final output
+
+            /// <summary>
+            /// Processes a large data set in batches and interacts with GPT to determine how much more can be processed.
+            /// </summary>
+            /// <param name="query">The Kusto query to execute.</param>
+            /// <param name="clusterUri">The URI of the Kusto cluster.</param>
+            /// <param name="databaseName">The Kusto database name.</param>
+            /// <returns>Returns the final processed output as a string.</returns>
+            public async Task<string> ProcessLargeDataSetAsync(string query, string clusterUri, string databaseName)
+            {
+                int pageSize = MaxRowsPerRequest;
+                int pageIndex = 0;
+                bool continueProcessing = true;
+
+                while (continueProcessing)
+                {
+                    // Fetch the next batch of data
+                    string batchResult = await KustoHelper.ExecuteKustoQueryForClusterWithPaginationAsync(clusterUri, databaseName, query, true, pageSize, pageIndex);
+
+                    if (string.IsNullOrEmpty(batchResult))
+                        break;  // No more data, end the loop
+
+                    // Append to the full output
+                    _fullOutput += batchResult;
+
+                    // Check if GPT can handle more data
+                    bool canProcessMore = AskGPTIfMoreDataCanBeProcessed(_fullOutput);
+
+                    if (!canProcessMore)
+                    {
+                        // Ask user if they want to continue processing more chunks
+                        continueProcessing = AskUserIfTheyWantToContinue();
+                    }
+                    else
+                    {
+                        // Increase page index to fetch the next batch
+                        pageIndex++;
+                    }
+                }
+
+                return _fullOutput;
             }
 
-            Logger.LogMessage($"Cluster with key '{clusterKey}' not found.", ConsoleColor.Red);
-            return null;
-        }
-    }
+            /// <summary>
+            /// Asks GPT whether it can handle more rows based on the current data size.
+            /// </summary>
+            private bool AskGPTIfMoreDataCanBeProcessed(string currentOutput) =>
+                // Here, send the currentOutput to GPT and ask if it can handle more data.
+                // For simplicity, let's simulate GPT's decision-making:
+                currentOutput.Length < MaxTokenSize;
 
-    // Kusto Cluster Config class to store cluster details
-    public class KustoClusterConfig
-    {
-        public string Name { get; }
-        public string Uri { get; }
-        public string DatabaseName { get; }
-        public string Description { get; }
-
-        public KustoClusterConfig(string name, string uri, string databaseName, string description)
-        {
-            Name = name;
-            Uri = uri;
-            DatabaseName = databaseName;
-            Description = description;
-        }
-    }
-
-    public class LargeRequestHelper
-    {
-        private readonly int MaxTokenSize = 100000;  // Maximum token size per GPT request
-        private readonly int MaxRowsPerRequest = 500;  // Maximum rows to send in one request
-        private string _fullOutput = string.Empty;  // Buffer to store the final output
-
-        /// <summary>
-        /// Processes a large data set in batches and interacts with GPT to determine how much more can be processed.
-        /// </summary>
-        /// <param name="query">The Kusto query to execute.</param>
-        /// <param name="clusterUri">The URI of the Kusto cluster.</param>
-        /// <param name="databaseName">The Kusto database name.</param>
-        /// <returns>Returns the final processed output as a string.</returns>
-        public async Task<string> ProcessLargeDataSetAsync(string query, string clusterUri, string databaseName)
-        {
-            int pageSize = MaxRowsPerRequest;
-            int pageIndex = 0;
-            bool continueProcessing = true;
-
-            while (continueProcessing)
+            /// <summary>
+            /// Asks the user if they want to continue processing more chunks.
+            /// </summary>
+            private bool AskUserIfTheyWantToContinue()
             {
-                // Fetch the next batch of data
-                string batchResult = await KustoHelper.ExecuteKustoQueryForClusterWithPaginationAsync(clusterUri, databaseName, query, true, pageSize, pageIndex);
-
-                if (string.IsNullOrEmpty(batchResult))
-                    break;  // No more data, end the loop
-
-                // Append to the full output
-                _fullOutput += batchResult;
-
-                // Check if GPT can handle more data
-                bool canProcessMore = AskGPTIfMoreDataCanBeProcessed(_fullOutput);
-
-                if (!canProcessMore)
-                {
-                    // Ask user if they want to continue processing more chunks
-                    continueProcessing = AskUserIfTheyWantToContinue();
-                }
-                else
-                {
-                    // Increase page index to fetch the next batch
-                    pageIndex++;
-                }
+                // Notify the user about the current batch, chunks processed, and ask if they want to continue
+                Console.WriteLine($"Processed {_fullOutput.Length} tokens so far. Do you want to process more? (y/n)");
+                string input = Console.ReadLine();
+                return input?.ToLower() == "y";
             }
-
-            return _fullOutput;
-        }
-
-        /// <summary>
-        /// Asks GPT whether it can handle more rows based on the current data size.
-        /// </summary>
-        private bool AskGPTIfMoreDataCanBeProcessed(string currentOutput) =>
-            // Here, send the currentOutput to GPT and ask if it can handle more data.
-            // For simplicity, let's simulate GPT's decision-making:
-            currentOutput.Length < MaxTokenSize;
-
-        /// <summary>
-        /// Asks the user if they want to continue processing more chunks.
-        /// </summary>
-        private bool AskUserIfTheyWantToContinue()
-        {
-            // Notify the user about the current batch, chunks processed, and ask if they want to continue
-            Console.WriteLine($"Processed {_fullOutput.Length} tokens so far. Do you want to process more? (y/n)");
-            string input = Console.ReadLine();
-            return input?.ToLower() == "y";
         }
     }
 }
