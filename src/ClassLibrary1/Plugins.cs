@@ -32,7 +32,11 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         public async Task<string> GetBuildInfoAsync(
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId)
-            => await ExecuteAndLogQueryAsync("Build", orgName, buildId, "No build found");
+        {
+            var result = await ExecuteAndLogQueryAsync("Build", orgName, buildId, "No build found");
+            await KustoHelper.SaveSuccessfulQuery($"Build info query for Org: {orgName}, BuildId: {buildId}", result);
+            return result;
+        }
 
         /// <summary>
         /// Retrieves work items linked to a specific build.
@@ -43,7 +47,11 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         public async Task<string> GetWorkItemsByBuildAsync(
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId)
-            => await ExecuteAndLogQueryAsync("BuildWorkItem", orgName, buildId, "No work items found");
+        {
+            var result = await ExecuteAndLogQueryAsync("BuildWorkItem", orgName, buildId, "No work items found");
+            await KustoHelper.SaveSuccessfulQuery($"Work items query for Org: {orgName}, BuildId: {buildId}", result);
+            return result;
+        }
 
         /// <summary>
         /// Retrieves commits linked to a specific build.
@@ -54,7 +62,11 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         public async Task<string> GetCommitsByBuildAsync(
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId)
-            => await ExecuteAndLogQueryAsync("BuildChange", orgName, buildId, "No commits found");
+        {
+            var result = await ExecuteAndLogQueryAsync("BuildChange", orgName, buildId, "No commits found");
+            await KustoHelper.SaveSuccessfulQuery($"Commits query for Org: {orgName}, BuildId: {buildId}", result);
+            return result;
+        }
 
         /// <summary>
         /// Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.
@@ -70,6 +82,8 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 
             var pullRequests = await KustoHelper.RetrievePullRequestsByBuildIdAsync(orgName, buildId);
             Logger.LogJson("Tool", pullRequests);
+
+            await KustoHelper.SaveSuccessfulQuery($"Pull requests query for Org: {orgName}, BuildId: {buildId}", pullRequests);
 
             return string.IsNullOrEmpty(pullRequests) ? $"No pull requests found for Org: {orgName} and BuildId: {buildId}" : pullRequests;
         }
@@ -150,6 +164,8 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
                 return HandleLargeResponse(result);
             }
 
+            await KustoHelper.SaveSuccessfulQuery($"Kusto query for Cluster: {clusterKey}, Query: {query}", result);
+
             return result ?? "No results found.";
         }
 
@@ -206,6 +222,8 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             string query = $".show database {clusterKey} cslschema";
             var result = await KustoHelper.ExecuteKustoQueryForClusterWithoutPaginationAsync(cluster.Uri, cluster.DatabaseName, query);
             Logger.LogJson("Tool", result);
+
+            await KustoHelper.SaveSuccessfulQuery($"List tables query for Cluster: {clusterKey}", result);
 
             return result ?? "No tables found.";
         }

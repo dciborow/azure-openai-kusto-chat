@@ -10,6 +10,8 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
     using Kusto.Data.Common;
     using Kusto.Data.Net.Client;
     using Newtonsoft.Json;
+    using System.IO;
+    using Microsoft.Azure.Cosmos;
 
     internal static class KustoHelper
     {
@@ -149,6 +151,44 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
                 }
             }
         }
+
+        /// <summary>
+        /// Saves a successful query to the specified storage (local or CosmosDB).
+        /// </summary>
+        public static async Task SaveSuccessfulQuery(string query, string result)
+        {
+            var storageType = ConfigurationHelper.GetStorageType();
+
+            if (storageType == "local")
+            {
+                await SaveQueryLocally(query, result);
+            }
+            else if (storageType == "cosmosdb")
+            {
+                await SaveQueryToCosmosDB(query, result);
+            }
+        }
+
+        private static async Task SaveQueryLocally(string query, string result)
+        {
+            var filePath = ConfigurationHelper.GetLocalFilePath();
+            var queryData = new { Query = query, Result = result, Timestamp = DateTime.UtcNow };
+
+            using (var writer = new StreamWriter(filePath, append: true))
+            {
+                await writer.WriteLineAsync(JsonConvert.SerializeObject(queryData));
+            }
+        }
+
+        private static async Task SaveQueryToCosmosDB(string query, string result)
+        {
+            var cosmosClient = new CosmosClient(ConfigurationHelper.GetCosmosDBConnectionString());
+            var database = cosmosClient.GetDatabase(ConfigurationHelper.GetCosmosDBDatabaseName());
+            var container = database.GetContainer(ConfigurationHelper.GetCosmosDBContainerName());
+
+            var queryData = new { id = Guid.NewGuid().ToString(), Query = query, Result = result, Timestamp = DateTime.UtcNow };
+            await container.CreateItemAsync(queryData);
+        }
     }
 
     internal static class Logger
@@ -202,5 +242,38 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
                 new AzureCliCredential(),
                 new DefaultAzureCredential()
             );
+    }
+
+    internal static class ConfigurationHelper
+    {
+        public static string GetStorageType()
+        {
+            // Retrieve storage type from configuration (local or cosmosdb)
+            return "local"; // Placeholder, replace with actual configuration retrieval logic
+        }
+
+        public static string GetLocalFilePath()
+        {
+            // Retrieve local file path from configuration
+            return "queryHistory.json"; // Placeholder, replace with actual configuration retrieval logic
+        }
+
+        public static string GetCosmosDBConnectionString()
+        {
+            // Retrieve CosmosDB connection string from configuration
+            return "your-cosmosdb-connection-string"; // Placeholder, replace with actual configuration retrieval logic
+        }
+
+        public static string GetCosmosDBDatabaseName()
+        {
+            // Retrieve CosmosDB database name from configuration
+            return "your-database-name"; // Placeholder, replace with actual configuration retrieval logic
+        }
+
+        public static string GetCosmosDBContainerName()
+        {
+            // Retrieve CosmosDB container name from configuration
+            return "your-container-name"; // Placeholder, replace with actual configuration retrieval logic
+        }
     }
 }
