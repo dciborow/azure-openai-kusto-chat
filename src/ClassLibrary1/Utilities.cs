@@ -4,11 +4,14 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
     using System.Data;
     using System.Text.Json;
     using System.Threading.Tasks;
+
     using Azure.Core;
     using Azure.Identity;
+
     using Kusto.Data;
     using Kusto.Data.Common;
     using Kusto.Data.Net.Client;
+
     using Newtonsoft.Json;
 
     internal static class KustoHelper
@@ -163,7 +166,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         /// </summary>
         public static void LogJson(string label, object data, int truncateLength = 200)
         {
-            string jsonString = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            string jsonString = System.Text.Json.JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
             string output = jsonString.Length > truncateLength ? jsonString.Substring(0, truncateLength) + "..." : jsonString;
 
             LogMessage($"\t{label}: {output}", ConsoleColor.DarkMagenta);
