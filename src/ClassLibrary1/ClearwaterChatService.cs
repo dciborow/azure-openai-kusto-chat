@@ -22,6 +22,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, CreateChainedCredential());
             builder.Plugins.AddFromType<Plugins.ClearwaterPlugin>();
             builder.Plugins.AddFromType<Plugins.KustoPlugin>();
+            builder.Plugins.AddFromType<Plugins.DevOpsPlugin>();
 
             _kernel = builder.Build();
 

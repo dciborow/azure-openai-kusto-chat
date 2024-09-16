@@ -10,6 +10,20 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
     public class ClearwaterPlugin
     {
         /// <summary>
+        /// Provides help information for the Clearwater plugin.
+        /// </summary>
+        [KernelFunction("help")]
+        [Description("Provides help information for the Clearwater plugin.")]
+        [return: Description("Returns the help information as a string.")]
+        public string Help()
+        {
+            return "Clearwater Plugin Help: This plugin provides various functions to interact with the 1es Kusto cluster database's AzureDevOps.";
+        }
+    }
+
+    public class DevOpsPlugin
+    {
+        /// <summary>
         /// Retrieves build information by organization name and build ID.
         /// </summary>
         [KernelFunction("get_build_info")]
@@ -52,7 +66,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId)
         {
-            Logger.LogFunctionCall("ClearwaterPlugin.GetPullRequestsByBuildAsync", orgName, buildId);
+            Logger.LogFunctionCall("DevOpsPlugin.GetPullRequestsByBuildAsync", orgName, buildId);
 
             var pullRequests = await KustoHelper.RetrievePullRequestsByBuildIdAsync(orgName, buildId);
             Logger.LogJson("Tool", pullRequests);
@@ -63,7 +77,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         // Central method to handle execution and logging for simple queries
         private async Task<string> ExecuteAndLogQueryAsync(string tableName, string orgName, string buildId, string noDataMessage)
         {
-            Logger.LogFunctionCall($"ClearwaterPlugin.Get{tableName}ByOrgAndBuildAsync", orgName, buildId);
+            Logger.LogFunctionCall($"DevOpsPlugin.Get{tableName}ByOrgAndBuildAsync", orgName, buildId);
 
             var result = await KustoHelper.RetrieveDataByOrgAndBuildIdAsync(tableName, orgName, buildId);
             Logger.LogJson("Tool", result);
