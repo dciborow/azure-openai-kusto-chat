@@ -1,8 +1,5 @@
 namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
-    using Azure.Core;
-    using Azure.Identity;
-
     using global::Microsoft.SemanticKernel;
     using global::Microsoft.SemanticKernel.ChatCompletion;
     using global::Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -20,9 +17,9 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         {
             var builder = Kernel.CreateBuilder();
             builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, CredentialHelper.CreateChainedCredential());
-            builder.Plugins.AddFromType<Plugins.ClearwaterPlugin>();
-            builder.Plugins.AddFromType<Plugins.KustoPlugin>();
-            builder.Plugins.AddFromType<Plugins.DevOpsPlugin>();
+            builder.Plugins.AddFromType<ClearwaterPlugin>();
+            builder.Plugins.AddFromType<KustoPlugin>();
+            builder.Plugins.AddFromType<DevOpsPlugin>();
 
             _kernel = builder.Build();
 
