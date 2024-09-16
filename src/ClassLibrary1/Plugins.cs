@@ -142,7 +142,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             }
 
             // Execute paginated query using the KustoHelper
-            var result = await KustoHelper.ExecuteKustoQueryForClusterAsync(cluster.Uri, cluster.DatabaseName, query, paginated, pageSize, pageIndex);
+            var result = await KustoHelper.ExecuteKustoQueryForClusterWithPaginationAsync(cluster.Uri, cluster.DatabaseName, query, paginated, pageSize, pageIndex);
 
             // Handle large responses by checking token limits
             if (result.Length > 1048576)  // Example: 1 MB limit
@@ -204,7 +204,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             }
 
             string query = $".show database {clusterKey} cslschema";
-            var result = await KustoHelper.ExecuteKustoQueryForClusterAsync(cluster.Uri, cluster.DatabaseName, query);
+            var result = await KustoHelper.ExecuteKustoQueryForClusterWithoutPaginationAsync(cluster.Uri, cluster.DatabaseName, query);
             Logger.LogJson("Tool", result);
 
             return result ?? "No tables found.";
@@ -264,7 +264,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             while (continueProcessing)
             {
                 // Fetch the next batch of data
-                string batchResult = await KustoHelper.ExecuteKustoQueryForClusterAsync(clusterUri, databaseName, query, true, pageSize, pageIndex);
+                string batchResult = await KustoHelper.ExecuteKustoQueryForClusterWithPaginationAsync(clusterUri, databaseName, query, true, pageSize, pageIndex);
 
                 if (string.IsNullOrEmpty(batchResult))
                     break;  // No more data, end the loop

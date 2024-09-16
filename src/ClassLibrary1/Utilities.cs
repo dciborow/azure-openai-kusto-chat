@@ -44,17 +44,6 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         }
 
         /// <summary>
-        /// Creates a ChainedTokenCredential to authenticate with Azure.
-        /// </summary>
-        internal static TokenCredential CreateChainedCredential()
-            => new ChainedTokenCredential(
-                new VisualStudioCredential(),
-                new VisualStudioCodeCredential(),
-                new AzureCliCredential(),
-                new DefaultAzureCredential()
-            );
-
-        /// <summary>
         /// General method to build and execute Kusto queries with logging.
         /// </summary>
         private static async Task<string> ExecuteQueryAsync(string tableName, string orgName, string buildId, string additionalQuery = "", object? parameters = null)
@@ -70,13 +59,13 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         /// <summary>
         /// Executes a Kusto query for a specific cluster and database with pagination.
         /// </summary>
-        public static async Task<string> ExecuteKustoQueryForClusterAsync(string clusterUri, string databaseName, string query)
+        public static async Task<string> ExecuteKustoQueryForClusterWithoutPaginationAsync(string clusterUri, string databaseName, string query)
         {
             // Log and execute query with pagination
             Logger.LogQuery(query);
 
             var credentials = new KustoConnectionStringBuilder(clusterUri)
-                .WithAadAzureTokenCredentialsAuthentication(CreateChainedCredential());
+                .WithAadAzureTokenCredentialsAuthentication(CredentialHelper.CreateChainedCredential());
 
             using (var kustoClient = KustoClientFactory.CreateCslQueryProvider(credentials))
             {
@@ -94,7 +83,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         /// <summary>
         /// Executes a Kusto query for a specific cluster and database with pagination.
         /// </summary>
-        public static async Task<string> ExecuteKustoQueryForClusterAsync(string clusterUri, string databaseName, string query, bool paginated = true, int pageSize = 1000, int pageIndex = 0)
+        public static async Task<string> ExecuteKustoQueryForClusterWithPaginationAsync(string clusterUri, string databaseName, string query, bool paginated = true, int pageSize = 1000, int pageIndex = 0)
         {
             string paginatedQuery = paginated
                 ? $"{query} | skip {pageIndex * pageSize} | take {pageSize}"
@@ -104,7 +93,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             Logger.LogQuery(paginatedQuery);
 
             var credentials = new KustoConnectionStringBuilder(clusterUri)
-                .WithAadAzureTokenCredentialsAuthentication(CreateChainedCredential());
+                .WithAadAzureTokenCredentialsAuthentication(CredentialHelper.CreateChainedCredential());
 
             using (var kustoClient = KustoClientFactory.CreateCslQueryProvider(credentials))
             {
@@ -127,7 +116,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             Logger.LogQuery(kustoQuery);
 
             var credentials = new KustoConnectionStringBuilder(KustoClusterUri)
-                .WithAadAzureTokenCredentialsAuthentication(CreateChainedCredential());
+                .WithAadAzureTokenCredentialsAuthentication(CredentialHelper.CreateChainedCredential());
 
             using (var kustoClient = KustoClientFactory.CreateCslQueryProvider(credentials))
             {
@@ -199,5 +188,19 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             Console.WriteLine($"Assistant (Query): {query}");
             Console.ResetColor();
         }
+    }
+
+    internal static class CredentialHelper
+    {
+        /// <summary>
+        /// Creates a ChainedTokenCredential to authenticate with Azure.
+        /// </summary>
+        internal static TokenCredential CreateChainedCredential()
+            => new ChainedTokenCredential(
+                new VisualStudioCredential(),
+                new VisualStudioCodeCredential(),
+                new AzureCliCredential(),
+                new DefaultAzureCredential()
+            );
     }
 }

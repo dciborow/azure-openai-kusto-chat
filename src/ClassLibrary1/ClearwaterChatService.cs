@@ -19,7 +19,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
         public ClearwaterChatService(string deploymentName, string endpoint)
         {
             var builder = Kernel.CreateBuilder();
-            builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, CreateChainedCredential());
+            builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, CredentialHelper.CreateChainedCredential());
             builder.Plugins.AddFromType<Plugins.ClearwaterPlugin>();
             builder.Plugins.AddFromType<Plugins.KustoPlugin>();
             builder.Plugins.AddFromType<Plugins.DevOpsPlugin>();
@@ -53,16 +53,5 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 
             return result.Content!;
         }
-
-        /// <summary>
-        /// Creates a ChainedTokenCredential to authenticate with Azure.
-        /// </summary>
-        internal static TokenCredential CreateChainedCredential()
-            => new ChainedTokenCredential(
-                new VisualStudioCredential(),
-                new VisualStudioCodeCredential(),
-                new AzureCliCredential(),
-                new DefaultAzureCredential()
-            );
     }
 }
