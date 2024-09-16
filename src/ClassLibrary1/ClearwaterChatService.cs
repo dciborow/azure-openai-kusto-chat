@@ -51,6 +51,9 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             // Add assistant's response to the chat history
             _chatHistory.AddAssistantMessage(result.Content!);
 
+            // Save the successful query and its result
+            await KustoHelper.SaveSuccessfulQuery(userInput, result.Content!);
+
             return result.Content!;
         }
     }
