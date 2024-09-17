@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,8 @@
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
-
+    using System.IO;
+    using Microsoft.Azure.Cosmos;
     using Microsoft.SemanticKernel;
 
     public class KustoPlugin
@@ -81,6 +82,8 @@
                     .ExecuteKustoQueryForClusterWithPaginationAsync(cluster!.Uri, cluster.DatabaseName, modifiedQuery, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
+                await KustoHelper.SaveSuccessfulQuery(modifiedQuery, result);
+
                 return result ?? CreateErrorResponse("No results found.");
             }
             catch (Exception ex)
@@ -129,6 +132,8 @@
                 var result = await KustoHelper
                     .ExecuteKustoQueryForClusterWithPaginationAsync(cluster!.Uri, cluster.DatabaseName, query, paginated, pageSize, pageIndex, cancellationToken)
                     .ConfigureAwait(false);
+
+                await KustoHelper.SaveSuccessfulQuery(query, result);
 
                 return ProcessQueryResult(result);
             }

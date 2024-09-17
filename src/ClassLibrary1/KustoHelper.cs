@@ -1,7 +1,8 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
     using System;
     using System.Data;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -10,14 +11,42 @@
     using Kusto.Data.Net.Client;
 
     using Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins;
-
+    using Microsoft.Azure.Cosmos;
     using Newtonsoft.Json;
 
     internal static class KustoHelper
     {
-        /// <summary>
-        /// Executes a Kusto query for a specific cluster and database without pagination.
-        /// </summary>
+        private static readonly string LocalFilePath = "successful_queries.log";
+        private static readonly string CosmosDbConnectionString = "your_cosmosdb_connection_string";
+        private static readonly string DatabaseName = "your_database_name";
+        private static readonly string ContainerName = "your_container_name";
+
+        public static async Task SaveSuccessfulQuery(string query, string result)
+        {
+            var vectorizedResult = VectorizeData(result);
+
+            var logEntry = new
+            {
+                Timestamp = DateTime.UtcNow,
+                Query = query,
+                Result = vectorizedResult
+            };
+
+            var logJson = JsonConvert.SerializeObject(logEntry);
+
+            // Save to local file
+            await File.AppendAllTextAsync(LocalFilePath, logJson + Environment.NewLine);
+
+            // Save to CosmosDB
+            using (var cosmosClient = new CosmosClient(CosmosDbConnectionString))
+            {
+                var database = await cosmosClient.CreateDatabaseIfNotExistsAsync(DatabaseName);
+                var container = await database.Database.CreateContainerIfNotExistsAsync(ContainerName, "/id");
+
+                await container.Container.CreateItemAsync(logEntry, new PartitionKey(logEntry.Timestamp.ToString("yyyy-MM-dd")));
+            }
+        }
+
         public static async Task<string> ExecuteKustoQueryForClusterWithoutPaginationAsync(string clusterUri, string databaseName, string query, CancellationToken cancellationToken = default)
         {
             LogQuery(query);
@@ -38,14 +67,15 @@
                 {
                     var dataTable = new DataTable();
                     dataTable.Load(reader);
-                    return JsonConvert.SerializeObject(dataTable);
+                    var result = JsonConvert.SerializeObject(dataTable);
+
+                    await SaveSuccessfulQuery(query, result);
+
+                    return result;
                 }
             }
         }
 
-        /// <summary>
-        /// Executes a Kusto query for a specific cluster and database with optional pagination.
-        /// </summary>
         public static async Task<string> ExecuteKustoQueryForClusterWithPaginationAsync(string clusterUri, string databaseName, string query, bool paginated = true, int pageSize = 1000, int pageIndex = 0, CancellationToken cancellationToken = default)
         {
             string paginatedQuery = paginated
@@ -70,14 +100,15 @@
                 {
                     var dataTable = new DataTable();
                     dataTable.Load(reader);
-                    return JsonConvert.SerializeObject(dataTable);
+                    var result = JsonConvert.SerializeObject(dataTable);
+
+                    await SaveSuccessfulQuery(paginatedQuery, result);
+
+                    return result;
                 }
             }
         }
 
-        /// <summary>
-        /// Executes a general Kusto query with optional parameters.
-        /// </summary>
         internal static async Task<string> ExecuteKustoQueryAsync(string clusterUri, string databaseName, string kustoQuery, object? parameters = null, CancellationToken cancellationToken = default)
         {
             LogQuery(kustoQuery);
@@ -101,14 +132,15 @@
                 {
                     var dataTable = new DataTable();
                     dataTable.Load(reader);
-                    return JsonConvert.SerializeObject(dataTable);
+                    var result = JsonConvert.SerializeObject(dataTable);
+
+                    await SaveSuccessfulQuery(kustoQuery, result);
+
+                    return result;
                 }
             }
         }
 
-        /// <summary>
-        /// Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.
-        /// </summary>
         internal static async Task<string> RetrievePullRequestsByBuildIdAsync(string orgName, string buildId, string clusterKey, CancellationToken cancellationToken = default)
         {
             string clusterUri = GetClusterUri(clusterKey);
@@ -123,9 +155,6 @@
             return await ExecuteKustoQueryAsync(clusterUri, databaseName, query, null, cancellationToken).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Retrieves data by table name, organization name, and build ID.
-        /// </summary>
         internal static async Task<string> RetrieveDataByOrgAndBuildIdAsync(string tableName, string orgName, string buildId, string clusterKey, CancellationToken cancellationToken = default)
         {
             string clusterUri = GetClusterUri(clusterKey);
@@ -138,9 +167,6 @@
             return await ExecuteKustoQueryAsync(clusterUri, databaseName, query, null, cancellationToken).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Injects query parameters into the ClientRequestProperties for the Kusto query.
-        /// </summary>
         private static void InjectQueryParameters(ClientRequestProperties properties, object parameters)
         {
             foreach (var prop in parameters.GetType().GetProperties())
@@ -153,9 +179,6 @@
             }
         }
 
-        /// <summary>
-        /// Logs the query to the console.
-        /// </summary>
         private static void LogQuery(string query)
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -163,23 +186,12 @@
             Console.ResetColor();
         }
 
-        /// <summary>
-        /// Escapes special characters in Kusto string literals.
-        /// </summary>
         private static string EscapeKustoString(string input) => input.Replace("'", "''");
 
-        /// <summary>
-        /// Escapes special characters in Kusto identifiers.
-        /// </summary>
         private static string EscapeKustoIdentifier(string input) =>
-            // Add any necessary escaping for identifiers if needed
             input;
 
-        /// <summary>
-        /// Retrieves the cluster URI based on the cluster key.
-        /// </summary>
         private static string GetClusterUri(string clusterKey) =>
-            // Ideally, retrieve cluster URIs from a configuration source
             clusterKey switch
             {
                 "safefly" => "https://safeflycluster.westus.kusto.windows.net/",
@@ -188,11 +200,7 @@
                 _ => throw new ArgumentException($"Unknown cluster key: {clusterKey}")
             };
 
-        /// <summary>
-        /// Retrieves the database name based on the cluster key.
-        /// </summary>
         private static string GetDatabaseName(string clusterKey) =>
-            // Ideally, retrieve database names from a configuration source
             clusterKey switch
             {
                 "safefly" => "safefly",
@@ -200,5 +208,35 @@
                 "azuredevops" => "AzureDevOps",
                 _ => throw new ArgumentException($"Unknown cluster key: {clusterKey}")
             };
+
+        private static string VectorizeData(string data)
+        {
+            // Implement your vectorization logic here
+            return data;
+        }
+
+        public static async Task CreateCosmosDbIndexAsync()
+        {
+            using (var cosmosClient = new CosmosClient(CosmosDbConnectionString))
+            {
+                var database = await cosmosClient.CreateDatabaseIfNotExistsAsync(DatabaseName);
+                var container = await database.Database.CreateContainerIfNotExistsAsync(ContainerName, "/id");
+
+                var indexingPolicy = new IndexingPolicy
+                {
+                    Automatic = true,
+                    IndexingMode = IndexingMode.Consistent,
+                    IncludedPaths = { new IncludedPath { Path = "/*" } },
+                    ExcludedPaths = { new ExcludedPath { Path = "/\"_etag\"/?" } }
+                };
+
+                container.Container.ReplaceContainerAsync(new ContainerProperties
+                {
+                    Id = ContainerName,
+                    PartitionKeyPath = "/id",
+                    IndexingPolicy = indexingPolicy
+                });
+            }
+        }
     }
 }

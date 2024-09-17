@@ -24,7 +24,6 @@ within the file for "TODO".
 ======================================================================================
 ====================================================================================-->
 
-
 <!---------------------[  Description  ]------------------<recommended> section below------------------>
 
 # steps
@@ -167,7 +166,6 @@ How to Evaluate & Examples:
 <!-- We use [SemVer](https://aka.ms/StartRight/README-Template/semver) for versioning. -->
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 -----------------------------------------------
 
 <!-----------------------[  Access  ]-----------------------<recommended> section below------------------>
@@ -257,7 +255,6 @@ If you do use it, please let us know via an email or
 leave a note in an issue, so we can best understand the value of this repository.
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[  Limitations  ]----------------------<optional> section below----------------->
 
 <!-- 
@@ -308,3 +305,44 @@ This README started as a template provided as part of the
 [README template](https://aka.ms/StartRight/README-Template) used in this repository is requested as an issue. 
 
 <!-- version: 2023-04-07 [Do not delete this line, it is used for analytics that drive template improvements] -->
+
+## Configuring and Using the New Functionality
+
+### Setting Up CosmosDB
+
+To use the new functionality for saving and tracking successful Kusto queries, you need to set up CosmosDB and configure the connection settings.
+
+1. **Create a CosmosDB Account**: Follow the instructions [here](https://docs.microsoft.com/en-us/azure/cosmos-db/create-sql-api-dotnet) to create a CosmosDB account.
+
+2. **Configure Connection Settings**: Update the `appsettings.json` file with your CosmosDB connection details.
+
+```json
+{
+  "CosmosDB": {
+    "CosmosDBConnectionString": "your_cosmosdb_connection_string",
+    "DatabaseName": "your_database_name",
+    "ContainerName": "your_container_name"
+  }
+}
+```
+
+### Using the New Functionality
+
+After setting up CosmosDB and configuring the connection settings, you can use the new functionality to save and track successful Kusto queries.
+
+#### Example: Saving a Successful Query
+
+```csharp
+string query = "Your Kusto query here";
+string result = await KustoHelper.ExecuteKustoQueryAsync(clusterUri, databaseName, query);
+```
+
+The `ExecuteKustoQueryAsync` method will automatically call `SaveSuccessfulQuery` to save the query and its result to both a local file and CosmosDB.
+
+#### Example: Retrieving Saved Queries
+
+You can retrieve the saved queries from the local file or CosmosDB as needed. The saved queries are stored in JSON format, making it easy to parse and use them in your application.
+
+### Additional Information
+
+For more details on configuring and using the new functionality, refer to the documentation provided in the `src/ClassLibrary1` folder.
