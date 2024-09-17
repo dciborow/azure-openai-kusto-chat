@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 {
     using System;
     using System.Collections.Generic;
@@ -9,25 +9,29 @@
 
     using Microsoft.SemanticKernel;
 
-    public class KustoPlugin
+    public class KustoPlugin : PluginBase
     {
         private readonly Dictionary<string, KustoClusterConfig> _clusters;
-        private static readonly string[] value = new[]
-                    {
-                        "Update the query with important columns by adding a '| project' section.",
-                        "Use 'kusto_query_count' to determine the number of results in your previous query.",
-                        "If the issue continues, add a 'take' statement or decrease the number of rows taken if it was already included.",
-                    };
 
         // Constructor that initializes clusters with unique keys
         public KustoPlugin()
         {
-            _clusters = new Dictionary<string, KustoClusterConfig>
+            _clusters = new Dictionary<string, KustoClusterConfig>();
+        }
+
+        /// <summary>
+        /// Initializes the Kusto client with necessary configurations.
+        /// </summary>
+        /// <param name="clusters">Dictionary of Kusto clusters to initialize.</param>
+        public void InitializeClient(Dictionary<string, KustoClusterConfig> clusters)
+        {
+            if (clusters == null || clusters.Count == 0)
+                throw new ArgumentException("Clusters cannot be null or empty.", nameof(clusters));
+
+            foreach (var cluster in clusters)
             {
-                { "safefly", new KustoClusterConfig("safefly", "https://safeflycluster.westus.kusto.windows.net/", "safefly", "Deployment Requests linked with Build ID") },
-                { "copilot", new KustoClusterConfig("copilot", "https://az-copilot-kusto.eastus.kusto.windows.net/", "copilotDevFeedback", "Copilot Risk reports for SafeFly requests based on compared builds of sequential requests") },
-                { "azuredevops", new KustoClusterConfig("azuredevops", "https://1es.kusto.windows.net/", "AzureDevOps", "Contains Builds, Pull Requests, Commits, and Work Items") }
-            };
+                _clusters[cluster.Key] = cluster.Value;
+            }
         }
 
         /// <summary>
@@ -208,7 +212,12 @@
                 return JsonSerializer.Serialize(new
                 {
                     message = $"The response length was {result.Length} characters and exceeded the token limit.",
-                    suggestions = value
+                    suggestions = new[]
+                    {
+                        "Update the query with important columns by adding a '| project' section.",
+                        "Use 'kusto_query_count' to determine the number of results in your previous query.",
+                        "If the issue continues, add a 'take' statement or decrease the number of rows taken if it was already included.",
+                    }
                 }, new JsonSerializerOptions { WriteIndented = true });
             }
 

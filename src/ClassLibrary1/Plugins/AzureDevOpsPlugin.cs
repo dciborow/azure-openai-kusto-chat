@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 {
     using System;
     using System.ComponentModel;
@@ -19,16 +19,23 @@
     /// </summary>
     public class AzureDevOpsPlugin : PluginBase
     {
-        private readonly WorkItemTrackingHttpClient _workItemClient;
-        private readonly string _defaultProject;
+        private WorkItemTrackingHttpClient _workItemClient;
+        private string _defaultProject;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureDevOpsPlugin"/> class.
         /// </summary>
+        public AzureDevOpsPlugin()
+        {
+        }
+
+        /// <summary>
+        /// Initializes the Azure DevOps client with necessary configurations.
+        /// </summary>
         /// <param name="personalAccessToken">Azure DevOps Personal Access Token for authentication.</param>
         /// <param name="organizationUrl">The Azure DevOps organization URL (e.g., https://dev.azure.com/yourorganization).</param>
         /// <param name="defaultProject">The default project name where work items will be created.</param>
-        public AzureDevOpsPlugin(string personalAccessToken, string organizationUrl, string defaultProject)
+        public void InitializeClient(string personalAccessToken, string organizationUrl, string defaultProject)
         {
             if (string.IsNullOrWhiteSpace(personalAccessToken))
                 throw new ArgumentException("Personal Access Token cannot be null or empty.", nameof(personalAccessToken));

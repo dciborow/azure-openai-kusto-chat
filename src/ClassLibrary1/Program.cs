@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
     /// <summary>
     /// Entry point for the Clearwater Chat REPL application.
@@ -12,11 +12,12 @@
         /// </summary>
         public static async Task Main(string[] args)
         {
-            // Azure OpenAI API Setup
-            string deploymentName = "gpt-4o-mini";
-            string endpoint = "https://gpt-review.openai.azure.com";
+            // Initialize services
+            var serviceInitializer = new ServiceInitializer();
+            var chatService = serviceInitializer.InitializeClearwaterChatService("gpt-4o-mini", "https://gpt-review.openai.azure.com");
 
-            var chatService = new ClearwaterChatService(deploymentName, endpoint);
+            // Initialize plugins
+            chatService.InitializePlugins();
 
             // REPL loop for interactive chat
             Console.WriteLine("Welcome to the Clearwater Chat REPL! Try asking me about ADO Org Build Id. Type 'exit' to quit.");
