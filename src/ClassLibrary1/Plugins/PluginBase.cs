@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 {
     using System;
     using System.Text.Json;
@@ -13,9 +13,7 @@
         /// Initializes the plugin. Can be overridden by derived classes for custom initialization.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public virtual Task InitializeAsync() =>
-            // Default implementation (can be overridden)
-            Task.CompletedTask;
+        public abstract Task InitializeAsync();
 
         /// <summary>
         /// Executes the plugin's primary function. Must be implemented by derived classes.
