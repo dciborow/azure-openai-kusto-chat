@@ -1,8 +1,10 @@
-namespace Microsoft.AzureCore.ReadyToDeploy.Vira
+﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
     using global::Microsoft.SemanticKernel;
     using global::Microsoft.SemanticKernel.ChatCompletion;
     using global::Microsoft.SemanticKernel.Connectors.OpenAI;
+
+    using Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins;
 
     /// <summary>
     /// A service for managing chat interactions using Azure OpenAI with persistent chat history.
@@ -20,6 +22,8 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
             builder.Plugins.AddFromType<ClearwaterPlugin>();
             builder.Plugins.AddFromType<KustoPlugin>();
             builder.Plugins.AddFromType<DevOpsPlugin>();
+            builder.Plugins.AddFromType<MetaPlugin>();
+            //builder.Plugins.AddFromType<SafeFlyPlugin>();
 
             _kernel = builder.Build();
 

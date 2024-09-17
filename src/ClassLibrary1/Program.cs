@@ -1,4 +1,4 @@
-namespace Microsoft.AzureCore.ReadyToDeploy.Vira
+﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
     /// <summary>
     /// Entry point for the Clearwater Chat REPL application.
