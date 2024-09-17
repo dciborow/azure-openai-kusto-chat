@@ -23,11 +23,13 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 
         public static async Task SaveSuccessfulQuery(string query, string result)
         {
+            var vectorizedResult = VectorizeData(result);
+
             var logEntry = new
             {
                 Timestamp = DateTime.UtcNow,
                 Query = query,
-                Result = result
+                Result = vectorizedResult
             };
 
             var logJson = JsonConvert.SerializeObject(logEntry);
@@ -206,5 +208,35 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira
                 "azuredevops" => "AzureDevOps",
                 _ => throw new ArgumentException($"Unknown cluster key: {clusterKey}")
             };
+
+        private static string VectorizeData(string data)
+        {
+            // Implement your vectorization logic here
+            return data;
+        }
+
+        public static async Task CreateCosmosDbIndexAsync()
+        {
+            using (var cosmosClient = new CosmosClient(CosmosDbConnectionString))
+            {
+                var database = await cosmosClient.CreateDatabaseIfNotExistsAsync(DatabaseName);
+                var container = await database.Database.CreateContainerIfNotExistsAsync(ContainerName, "/id");
+
+                var indexingPolicy = new IndexingPolicy
+                {
+                    Automatic = true,
+                    IndexingMode = IndexingMode.Consistent,
+                    IncludedPaths = { new IncludedPath { Path = "/*" } },
+                    ExcludedPaths = { new ExcludedPath { Path = "/\"_etag\"/?" } }
+                };
+
+                container.Container.ReplaceContainerAsync(new ContainerProperties
+                {
+                    Id = ContainerName,
+                    PartitionKeyPath = "/id",
+                    IndexingPolicy = indexingPolicy
+                });
+            }
+        }
     }
 }

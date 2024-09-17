@@ -1,8 +1,9 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 {
     using System;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos;
 
     /// <summary>
     /// Provides a base implementation for plugins, including common functionalities like logging and error handling.
@@ -93,5 +94,47 @@
         /// <returns>A JSON string representing the error response.</returns>
         protected string CreateErrorResponse(string message) =>
             JsonSerializer.Serialize(new { error = true, message }, new JsonSerializerOptions { WriteIndented = true });
+
+        /// <summary>
+        /// Vectorizes the given data.
+        /// </summary>
+        /// <param name="data">The data to vectorize.</param>
+        /// <returns>The vectorized data.</returns>
+        protected string VectorizeData(string data)
+        {
+            // Implement your vectorization logic here
+            return data;
+        }
+
+        /// <summary>
+        /// Creates an index in Cosmos DB for optimized search queries.
+        /// </summary>
+        /// <param name="cosmosDbConnectionString">The Cosmos DB connection string.</param>
+        /// <param name="databaseName">The name of the database.</param>
+        /// <param name="containerName">The name of the container.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        protected async Task CreateCosmosDbIndexAsync(string cosmosDbConnectionString, string databaseName, string containerName)
+        {
+            using (var cosmosClient = new CosmosClient(cosmosDbConnectionString))
+            {
+                var database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
+                var container = await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
+
+                var indexingPolicy = new IndexingPolicy
+                {
+                    Automatic = true,
+                    IndexingMode = IndexingMode.Consistent,
+                    IncludedPaths = { new IncludedPath { Path = "/*" } },
+                    ExcludedPaths = { new ExcludedPath { Path = "/\"_etag\"/?" } }
+                };
+
+                await container.Container.ReplaceContainerAsync(new ContainerProperties
+                {
+                    Id = containerName,
+                    PartitionKeyPath = "/id",
+                    IndexingPolicy = indexingPolicy
+                });
+            }
+        }
     }
 }
