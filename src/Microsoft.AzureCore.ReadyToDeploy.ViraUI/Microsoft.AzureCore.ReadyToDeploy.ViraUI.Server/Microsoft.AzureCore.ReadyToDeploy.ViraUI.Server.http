@@ -1,0 +1,6 @@
+@Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server_HostAddress = http://localhost:5015
+
+GET {{Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

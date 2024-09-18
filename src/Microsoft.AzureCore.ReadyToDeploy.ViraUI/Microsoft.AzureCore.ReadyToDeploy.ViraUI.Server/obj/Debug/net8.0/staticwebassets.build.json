@@ -1,0 +1,24 @@
+{
+  "Version": 1,
+  "Hash": "CWZBmeqewLA/1edYpZ8aLPtT2dPIsphqi3r6qtoqzto=",
+  "Source": "Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server",
+  "BasePath": "_content/Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "F:\\git\\azure-openai-kusto-chat\\src\\Microsoft.AzureCore.ReadyToDeploy.ViraUI\\microsoft.azurecore.readytodeploy.viraui.client\\microsoft.azurecore.readytodeploy.viraui.client.esproj",
+      "Version": 2,
+      "Source": "microsoft.azurecore.readytodeploy.viraui.client",
+      "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

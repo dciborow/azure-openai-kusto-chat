@@ -1,21 +1,20 @@
 ﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
-    using global::Microsoft.SemanticKernel;
-    using global::Microsoft.SemanticKernel.ChatCompletion;
-    using global::Microsoft.SemanticKernel.Connectors.OpenAI;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
 
     using Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers;
     using Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.SemanticKernel;
+    using Microsoft.SemanticKernel.ChatCompletion;
+    using Microsoft.SemanticKernel.Connectors.OpenAI;
 
-    /// <summary>
-    /// A service for managing chat interactions using Azure OpenAI with persistent chat history.
-    /// </summary>
     public class ClearwaterChatService
     {
         private readonly Kernel _kernel;
-        private readonly ChatHistory _chatHistory;
+        private readonly ConcurrentDictionary<string, ChatHistory> _chatHistories;
 
-        // Initialize chat history in the constructor
         public ClearwaterChatService(string deploymentName, string endpoint)
         {
             var builder = Kernel
@@ -28,33 +27,28 @@
             builder.Plugins.AddFromType<DevOpsPlugin>();
 
             _kernel = builder.Build();
-
-            // Initialize the chat history to persist across multiple interactions
-            _chatHistory = new ChatHistory("How can I assist you today?");
+            _chatHistories = new ConcurrentDictionary<string, ChatHistory>();
         }
 
-        // Method now reuses chat history
-        public async Task<string> GetChatResponseAsync(string userInput)
+        public async Task<string> GetChatResponseAsync(string userId, string userInput)
         {
-            // Add the user's message to the existing chat history
-            _chatHistory.AddUserMessage(userInput);
+            var chatHistory = _chatHistories.GetOrAdd(userId, _ => new ChatHistory("How can I assist you today?"));
+            chatHistory.AddUserMessage(userInput);
 
             var openAIPromptExecutionSettings = new OpenAIPromptExecutionSettings
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
             };
 
-            var chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
+            var chatCompletionService = _kernel.Services.GetRequiredService<IChatCompletionService>();
+
             var result = await chatCompletionService.GetChatMessageContentAsync(
-                _chatHistory,
-                executionSettings: openAIPromptExecutionSettings,
-                kernel: _kernel
-            );
+                chatHistory,
+                openAIPromptExecutionSettings);
 
-            // Add assistant's response to the chat history
-            _chatHistory.AddAssistantMessage(result.Content!);
+            chatHistory.AddAssistantMessage(result.Content);
 
-            return result.Content!;
+            return result.Content;
         }
     }
 }

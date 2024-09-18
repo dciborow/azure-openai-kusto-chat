@@ -32,7 +32,7 @@
                     break;
                 }
 
-                var response = await chatService.GetChatResponseAsync(userInput!);
+                var response = await chatService.GetChatResponseAsync("user", userInput!);
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Assistant > " + response);

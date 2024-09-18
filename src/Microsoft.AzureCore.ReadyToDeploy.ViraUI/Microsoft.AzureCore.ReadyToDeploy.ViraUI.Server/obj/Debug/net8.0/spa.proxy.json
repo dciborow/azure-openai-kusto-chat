@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:5173",
+"RedirectUrl": "",
+"LaunchCommand": "npm run dev",
+"WorkingDirectory": "F:\\git\\azure-openai-kusto-chat\\src\\Microsoft.AzureCore.ReadyToDeploy.ViraUI\\Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server\\..\\microsoft.azurecore.readytodeploy.viraui.client",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

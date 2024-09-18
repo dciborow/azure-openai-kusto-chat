@@ -7,6 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureCore.ReadyTo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureCore.ReadyToDeploy.Vira.Tests", "Microsoft.AzureCore.ReadyToDeploy.Vira.Tests\Microsoft.AzureCore.ReadyToDeploy.Vira.Tests.csproj", "{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server", "Microsoft.AzureCore.ReadyToDeploy.ViraUI\Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server\Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server.csproj", "{021802B5-F72C-4905-9075-5041ADB1FE78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vira.AppHost", "Vira.AppHost\Vira.AppHost.csproj", "{84D07FEE-8797-431E-8E06-CE406A8BAA8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vira.ServiceDefaults", "Vira.ServiceDefaults\Vira.ServiceDefaults.csproj", "{AAEE8643-EC3B-4880-93AC-D36158D79AA7}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "microsoft.azurecore.readytodeploy.viraui.client", "Microsoft.AzureCore.ReadyToDeploy.ViraUI\microsoft.azurecore.readytodeploy.viraui.client\microsoft.azurecore.readytodeploy.viraui.client.esproj", "{F57548BC-551B-4175-ADE7-4841CFEB7BB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +29,24 @@ Global
 		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{021802B5-F72C-4905-9075-5041ADB1FE78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{021802B5-F72C-4905-9075-5041ADB1FE78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{021802B5-F72C-4905-9075-5041ADB1FE78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{021802B5-F72C-4905-9075-5041ADB1FE78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84D07FEE-8797-431E-8E06-CE406A8BAA8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84D07FEE-8797-431E-8E06-CE406A8BAA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84D07FEE-8797-431E-8E06-CE406A8BAA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84D07FEE-8797-431E-8E06-CE406A8BAA8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAEE8643-EC3B-4880-93AC-D36158D79AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAEE8643-EC3B-4880-93AC-D36158D79AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAEE8643-EC3B-4880-93AC-D36158D79AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAEE8643-EC3B-4880-93AC-D36158D79AA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F57548BC-551B-4175-ADE7-4841CFEB7BB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F57548BC-551B-4175-ADE7-4841CFEB7BB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F57548BC-551B-4175-ADE7-4841CFEB7BB2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F57548BC-551B-4175-ADE7-4841CFEB7BB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F57548BC-551B-4175-ADE7-4841CFEB7BB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F57548BC-551B-4175-ADE7-4841CFEB7BB2}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
