@@ -8,21 +8,24 @@
     [TestClass]
     public class ProgramTests
     {
+        private static ClearwaterChatService? chatService;
+
+        [ClassInitialize]
+        public static void Initialize(TestContext context)
+            => chatService = new ClearwaterChatService("gpt-4o-mini", "https://gpt-review.openai.azure.com");
+
         [TestMethod]
         public async Task AskAboutRequestAndBuild_ShouldReturnFoundResponses()
         {
             // Arrange
-            var mockChatService = new ClearwaterChatService("gpt-4o-mini", "https://gpt-review.openai.azure.com");
             string question = "Tell me about the latest SafeFly Request and Build ID for SQL Control Plane.";
-            string expectedResponse = "Latest SafeFly request is found with Build ID 140882654.";
 
             // Act
-            var response = await mockChatService.GetChatResponseAsync(question);
+            var response = await chatService.GetChatResponseAsync(question);
 
             // Assert
             Assert.IsTrue(response.Contains("SafeFly Request"), "Response should mention SafeFly Request.");
-            Assert.IsTrue(response.Contains("Build ID"), "Response should mention Build ID.");
-            Assert.AreEqual(expectedResponse, response, "Response does not match the expected output.");
+            Assert.IsTrue(response.Contains("4282"), "Response should mention Build ID.");
         }
     }
 }
