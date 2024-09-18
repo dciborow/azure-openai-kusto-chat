@@ -9,6 +9,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 
     using Kusto.Cloud.Platform.Utils;
 
+    using Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers;
     using Microsoft.SemanticKernel;
 
     using Octokit;
@@ -191,7 +192,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
         /// <param name="functionName">Name of the function being called.</param>
         /// <param name="args">Arguments passed to the function.</param>
         private new void LogFunctionCall(string functionName, params string[] args) =>
-            Logger.LogFunctionCall($"GitHubPlugin.{functionName}", args);
+            LoggerHelper.LogFunctionCall($"GitHubPlugin.{functionName}", args);
 
         /// <summary>
         /// Logs JSON data with a specified label.
@@ -199,14 +200,14 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
         /// <param name="label">Label for the JSON data.</param>
         /// <param name="data">The data to log.</param>
         private new void LogJson(string label, string data) =>
-            Logger.LogJson(label, data);
+            LoggerHelper.LogJson(label, data);
 
         /// <summary>
         /// Logs an error with exception details.
         /// </summary>
         /// <param name="message">The error message.</param>
         private void LogError(string message) =>
-            Logger.LogError(message);
+            LoggerHelper.LogError(message);
 
         public override string Help() => throw new NotImplementedException();
     }

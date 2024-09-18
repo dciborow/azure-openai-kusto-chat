@@ -4,6 +4,7 @@
     using global::Microsoft.SemanticKernel.ChatCompletion;
     using global::Microsoft.SemanticKernel.Connectors.OpenAI;
 
+    using Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers;
     using Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins;
 
     /// <summary>
@@ -17,13 +18,13 @@
         // Initialize chat history in the constructor
         public ClearwaterChatService(string deploymentName, string endpoint)
         {
-            var builder = Kernel.CreateBuilder();
-            builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, CredentialHelper.CreateChainedCredential());
+            var builder = Kernel
+                .CreateBuilder()
+                .AddAzureOpenAIChatCompletion(deploymentName, endpoint, CredentialHelper.CreateChainedCredential());
+
             builder.Plugins.AddFromType<MetaPlugin>();
             builder.Plugins.AddFromType<KustoPlugin>();
             builder.Plugins.AddFromType<SafeFlyPlugin>();
-
-            builder.Plugins.AddFromType<ClearwaterPlugin>();
             builder.Plugins.AddFromType<DevOpsPlugin>();
 
             _kernel = builder.Build();

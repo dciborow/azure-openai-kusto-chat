@@ -1,12 +1,12 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers
 {
     using System;
     using System.Text.Json;
 
-    using global::Azure.Core;
-    using global::Azure.Identity;
-
-    internal static class Logger
+    /// <summary>
+    /// Provides methods for logging various types of messages with color coding.
+    /// </summary>
+    internal static class LoggerHelper
     {
         /// <summary>
         /// Logs a function call with the given arguments.
@@ -57,19 +57,5 @@
         /// Logs an error message with details.
         /// </summary>
         public static void LogError(string message) => LogMessage($"Error: {message}", ConsoleColor.Red);
-    }
-
-    public static class CredentialHelper
-    {
-        /// <summary>
-        /// Creates a ChainedTokenCredential to authenticate with Azure.
-        /// </summary>
-        internal static TokenCredential CreateChainedCredential()
-            => new ChainedTokenCredential(
-                new VisualStudioCredential(),
-                new VisualStudioCodeCredential(),
-                new AzureCliCredential(),
-                new DefaultAzureCredential()
-            );
     }
 }

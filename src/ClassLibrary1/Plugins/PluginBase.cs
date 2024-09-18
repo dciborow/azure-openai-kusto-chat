@@ -2,21 +2,12 @@
 {
     using System;
     using System.Text.Json;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Provides a base implementation for plugins, including common functionalities like logging and error handling.
     /// </summary>
     public abstract class PluginBase : IPlugin
     {
-        /// <summary>
-        /// Initializes the plugin. Can be overridden by derived classes for custom initialization.
-        /// </summary>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        public virtual Task InitializeAsync() =>
-            // Default implementation (can be overridden)
-            Task.CompletedTask;
-
         /// <summary>
         /// Provides help information about the plugin's functionalities. Must be implemented by derived classes.
         /// </summary>

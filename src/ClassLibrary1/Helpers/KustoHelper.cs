@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
+﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers
 {
     using System;
     using System.Data;
@@ -8,8 +8,6 @@
     using Kusto.Data;
     using Kusto.Data.Common;
     using Kusto.Data.Net.Client;
-
-    using Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins;
 
     using Newtonsoft.Json;
 
@@ -54,7 +52,11 @@
         /// <summary>
         /// Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.
         /// </summary>
-        internal static async Task<string> RetrievePullRequestsByBuildIdAsync(string orgName, string buildId, string clusterKey, CancellationToken cancellationToken = default)
+        internal static async Task<string> RetrievePullRequestsByBuildIdAsync(
+            string orgName,
+            string buildId,
+            string clusterKey,
+            CancellationToken cancellationToken = default)
         {
             string clusterUri = GetClusterUri(clusterKey);
             string databaseName = GetDatabaseName(clusterKey);
@@ -71,7 +73,12 @@
         /// <summary>
         /// Retrieves data by table name, organization name, and build ID.
         /// </summary>
-        internal static async Task<string> RetrieveDataByOrgAndBuildIdAsync(string tableName, string orgName, string buildId, string clusterKey, CancellationToken cancellationToken = default)
+        internal static async Task<string> RetrieveDataByOrgAndBuildIdAsync(
+            string tableName,
+            string orgName,
+            string buildId,
+            string clusterKey,
+            CancellationToken cancellationToken = default)
         {
             string clusterUri = GetClusterUri(clusterKey);
             string databaseName = GetDatabaseName(clusterKey);
@@ -86,7 +93,9 @@
         /// <summary>
         /// Injects query parameters into the ClientRequestProperties for the Kusto query.
         /// </summary>
-        private static void InjectQueryParameters(ClientRequestProperties properties, object parameters)
+        private static void InjectQueryParameters(
+            ClientRequestProperties properties,
+            object parameters)
         {
             foreach (var prop in parameters.GetType().GetProperties())
             {

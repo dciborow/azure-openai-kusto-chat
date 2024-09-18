@@ -7,6 +7,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    using Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers;
     using Microsoft.SemanticKernel;
 
     public class KustoPlugin : PluginBase
@@ -14,7 +15,7 @@
         private const string KustoFunctionsLogPath = "kusto_functions.log";
 
         private readonly Dictionary<string, KustoClusterConfig> _clusters;
-        private static readonly string[] tokenLimitExceededSuggstions = new[]
+        private static readonly string[] tokenLimitExceededSuggestions = new[]
                     {
                         "try again after choosing important columns from the schema and select them using ' | project'.",
                         "Use 'kusto_query_count' to determine the number of results in your previous query.",
@@ -182,8 +183,8 @@
         {
             if (TryTokenLimit(result))
             {
-                Logger.LogMessage($"Response is too large. Considering how we should proceed. Result length: {result.Length}", ConsoleColor.DarkGreen);
-                return string.Join("\n", tokenLimitExceededSuggstions);
+                LoggerHelper.LogMessage($"Response is too large. Considering how we should proceed. Result length: {result.Length}", ConsoleColor.DarkGreen);
+                return string.Join("\n", tokenLimitExceededSuggestions);
             }
 
             return result ?? "No results found.";
@@ -237,7 +238,7 @@
         private protected new void LogFunctionCall(
             string functionName,
             params string[] args)
-            => Logger.LogFunctionCall($"KustoPluginVNext.{functionName}", args);
+            => LoggerHelper.LogFunctionCall($"KustoPluginVNext.{functionName}", args);
 
         /// <summary>
         /// Logs JSON data with a specified label.
@@ -245,7 +246,7 @@
         /// <param name="label">Label for the JSON data.</param>
         /// <param name="data">The data to log.</param>
         private protected new void LogJson(string label, string data)
-            => Logger.LogJson(label, data);
+            => LoggerHelper.LogJson(label, data);
 
         /// <summary>
         /// Logs an error with exception details.
@@ -253,7 +254,7 @@
         /// <param name="ex">The exception that was thrown.</param>
         /// <param name="context">Contextual information about where the error occurred.</param>
         private void LogError(Exception ex, string context)
-            => Logger.LogError($"Error in KustoPluginVNext: {context} - {ex.Message}");
+            => LoggerHelper.LogError($"Error in KustoPluginVNext: {context} - {ex.Message}");
 
         /// <summary>
         /// Logs a message with a specific color.
@@ -261,7 +262,7 @@
         /// <param name="message">The message to log.</param>
         /// <param name="color">The color to use for the message.</param>
         private void LogMessage(string message, ConsoleColor color)
-            => Logger.LogMessage(message, color);
+            => LoggerHelper.LogMessage(message, color);
 
         /// <summary>
         /// Tries to determine if the result exceeds the token limit.
