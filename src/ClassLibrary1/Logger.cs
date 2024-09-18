@@ -21,7 +21,11 @@
             try
             {
                 var parsedJson = JsonSerializer.Deserialize<JsonElement>(jsonData);
-                string formattedJson = JsonSerializer.Serialize(parsedJson, new JsonSerializerOptions { WriteIndented = true });
+                string formattedJson = string.Empty;
+
+                formattedJson = JsonSerializer.Serialize(parsedJson, new JsonSerializerOptions { WriteIndented = true });
+
+
                 LogMessage($"\t{label}: {formattedJson}", ConsoleColor.DarkMagenta);
             }
             catch (JsonException)
@@ -35,6 +39,15 @@
         /// </summary>
         public static void LogMessage(string message, ConsoleColor color)
         {
+            var maxLength = 1200; // 10 lines at 120
+            var sampleLength = 240; // 2 lines at 120
+
+            if (message.Length > maxLength)
+            {
+                // Truncate the message and add an ellipsis to indicate truncation
+                message = string.Concat(message.AsSpan(0, sampleLength), "...");
+            }
+
             Console.ForegroundColor = color;
             Console.WriteLine(message);
             Console.ResetColor();

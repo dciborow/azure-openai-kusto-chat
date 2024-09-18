@@ -18,13 +18,6 @@
             Task.CompletedTask;
 
         /// <summary>
-        /// Executes the plugin's primary function. Must be implemented by derived classes.
-        /// </summary>
-        /// <param name="parameters">Parameters required for execution.</param>
-        /// <returns>A task representing the asynchronous operation, returning the result as a string.</returns>
-        public abstract Task<string> ExecuteAsync(params string[] parameters);
-
-        /// <summary>
         /// Provides help information about the plugin's functionalities. Must be implemented by derived classes.
         /// </summary>
         /// <returns>A JSON-formatted string detailing available functions and their usage.</returns>

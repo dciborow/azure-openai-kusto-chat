@@ -207,7 +207,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
         /// <param name="message">The error message.</param>
         private void LogError(string message) =>
             Logger.LogError(message);
-        public override Task<string> ExecuteAsync(params string[] parameters) => throw new NotImplementedException();
+
         public override string Help() => throw new NotImplementedException();
     }
 }

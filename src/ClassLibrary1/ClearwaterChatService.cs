@@ -19,11 +19,12 @@
         {
             var builder = Kernel.CreateBuilder();
             builder.AddAzureOpenAIChatCompletion(deploymentName, endpoint, CredentialHelper.CreateChainedCredential());
-            builder.Plugins.AddFromType<ClearwaterPlugin>();
-            builder.Plugins.AddFromType<KustoPlugin>();
-            builder.Plugins.AddFromType<DevOpsPlugin>();
             builder.Plugins.AddFromType<MetaPlugin>();
-            //builder.Plugins.AddFromType<SafeFlyPlugin>();
+            builder.Plugins.AddFromType<KustoPlugin>();
+            builder.Plugins.AddFromType<SafeFlyPlugin>();
+
+            builder.Plugins.AddFromType<ClearwaterPlugin>();
+            builder.Plugins.AddFromType<DevOpsPlugin>();
 
             _kernel = builder.Build();
 

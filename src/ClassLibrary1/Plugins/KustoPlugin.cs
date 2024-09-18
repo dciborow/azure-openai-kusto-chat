@@ -9,12 +9,14 @@
 
     using Microsoft.SemanticKernel;
 
-    public class KustoPlugin
+    public class KustoPlugin : PluginBase
     {
+        private const string KustoFunctionsLogPath = "kusto_functions.log";
+
         private readonly Dictionary<string, KustoClusterConfig> _clusters;
-        private static readonly string[] value = new[]
+        private static readonly string[] tokenLimitExceededSuggstions = new[]
                     {
-                        "Update the query with important columns by adding a '| project' section.",
+                        "try again after choosing important columns from the schema and select them using ' | project'.",
                         "Use 'kusto_query_count' to determine the number of results in your previous query.",
                         "If the issue continues, add a 'take' statement or decrease the number of rows taken if it was already included.",
                     };
@@ -28,6 +30,21 @@
                 { "copilot", new KustoClusterConfig("copilot", "https://az-copilot-kusto.eastus.kusto.windows.net/", "copilotDevFeedback", "Copilot Risk reports for SafeFly requests based on compared builds of sequential requests") },
                 { "azuredevops", new KustoClusterConfig("azuredevops", "https://1es.kusto.windows.net/", "AzureDevOps", "Contains Builds, Pull Requests, Commits, and Work Items") }
             };
+        }
+
+        [KernelFunction("kusto_query_best_practices")]
+        [Description("Should always run this step before using kusto_query. Retrieve a set of Kusto Best Practices that can be used before running a kusto query.")]
+        [return: Description("Returns the list of best practices to follow when writing kusto queries.")]
+        public string KustoBestPractices()
+        {
+            LogFunctionCall("KustoPluginVNext.KustoBestPractices");
+
+            return @"The following are best practices for GPT to use Kusto
+1. When getting errors always check that you have the correct columns for the table.
+    Semantic error: 'summarize' operator: Failed to resolve scalar expression named
+    Semantic error: 'project' operator: Failed to resolve scalar expression named
+2. If you have trouble finding a specific value, check the distinct values of the column
+";
         }
 
         /// <summary>
@@ -53,93 +70,6 @@
         }
 
         /// <summary>
-        /// Executes a Kusto query to count the number of rows returned by the original query.
-        /// </summary>
-        [KernelFunction("kusto_query_count")]
-        [Description("Appends | count to a query to determine how many rows are being returned to help query large datasets.")]
-        [return: Description("Returns the result of the query as a JSON string.")]
-        public async Task<string> KustoQueryCountAsync(
-            [Description("Key of the Kusto cluster to query (e.g., 'azuredevops', 'safefly', etc.).")] string clusterKey,
-            [Description("The Kusto query string to execute.")] string query,
-            CancellationToken cancellationToken = default)
-        {
-            if (!ValidateClusterKey(clusterKey, out var cluster, out var errorResponse))
-            {
-                return errorResponse;
-            }
-
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return CreateErrorResponse("The 'query' parameter cannot be null or empty.");
-            }
-
-            string modifiedQuery = $"{query} | count";
-
-            try
-            {
-                var result = await KustoHelper
-                    .ExecuteKustoQueryForClusterWithPaginationAsync(cluster!.Uri, cluster.DatabaseName, modifiedQuery, cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
-                return result ?? CreateErrorResponse("No results found.");
-            }
-            catch (Exception ex)
-            {
-                LogError(ex, "An error occurred while executing the Kusto count query.");
-                return CreateErrorResponse("An internal error occurred while executing the count query.");
-            }
-        }
-
-        /// <summary>
-        /// Executes a Kusto query against the specified database with optional pagination.
-        /// </summary>
-        [KernelFunction("kusto_query")]
-        [Description("Executes a query against the specified Kusto database with pagination support. Adjust pageSize and pageIndex for larger data sets.")]
-        [return: Description("Returns the result of the query as a JSON string.")]
-        public async Task<string> QueryKustoDatabaseAsync(
-            [Description("Key of the Kusto cluster to query (e.g., 'azuredevops', 'safefly', etc.).")] string clusterKey,
-            [Description("The Kusto query string to execute.")] string query,
-            [Description("Boolean flag indicating whether to paginate the results. Default is false.")] bool paginated = false,
-            [Description("The number of rows to return in a single page when paginated. Default is 1000 rows per page.")] int pageSize = 1000,
-            [Description("The index of the page to retrieve when paginated. Starts at 0 for the first page.")] int pageIndex = 0,
-            CancellationToken cancellationToken = default)
-        {
-            if (!ValidateClusterKey(clusterKey, out var cluster, out var errorResponse))
-            {
-                return errorResponse!;
-            }
-
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return CreateErrorResponse("The 'query' parameter cannot be null or empty.");
-            }
-
-            if (pageSize <= 0)
-            {
-                return CreateErrorResponse("The 'pageSize' must be a positive integer.");
-            }
-
-            if (pageIndex < 0)
-            {
-                return CreateErrorResponse("The 'pageIndex' cannot be negative.");
-            }
-
-            try
-            {
-                var result = await KustoHelper
-                    .ExecuteKustoQueryForClusterWithPaginationAsync(cluster!.Uri, cluster.DatabaseName, query, paginated, pageSize, pageIndex, cancellationToken)
-                    .ConfigureAwait(false);
-
-                return ProcessQueryResult(result);
-            }
-            catch (Exception ex)
-            {
-                LogError(ex, "An error occurred while executing the Kusto query.");
-                return CreateErrorResponse("An internal error occurred while executing the query.");
-            }
-        }
-
-        /// <summary>
         /// Provides a list of tables in the specified Kusto database.
         /// </summary>
         [KernelFunction("list_kusto_tables")]
@@ -162,7 +92,7 @@
             try
             {
                 var result = await KustoHelper
-                    .ExecuteKustoQueryForClusterWithoutPaginationAsync(cluster.Uri, cluster.DatabaseName, query, cancellationToken)
+                    .ExecuteKustoQueryAsync(cluster.Uri, cluster.DatabaseName, query, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
                 LogJson("Tool", result);
 
@@ -176,23 +106,72 @@
         }
 
         /// <summary>
-        /// Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.
+        /// Executes a Kusto query against the specified database with optional pagination.
         /// </summary>
-        [KernelFunction("get_pull_requests_by_build")]
-        [Description("Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.")]
-        [return: Description("Returns the pull requests associated with the build in JSON format or a message if no pull requests are found.")]
-        public async Task<string> GetPullRequestsByBuildAsync(
+        [KernelFunction("kusto_query")]
+        [Description("Executes a query against the specified Kusto database.")]
+        [return: Description("Returns the result of the query as a JSON string.")]
+        public async Task<string> QueryKustoAsync(
             [Description("Key of the Kusto cluster to query (e.g., 'azuredevops', 'safefly', etc.).")] string clusterKey,
-            [Description("The name of the organization (e.g., 'msazure').")] string orgName,
-            [Description("The build ID to look up.")] string buildId,
+            [Description("The Kusto query string to execute.")] string query,
             CancellationToken cancellationToken = default)
         {
-            LogFunctionCall("KustoPluginVNext.GetPullRequestsByBuildAsync", orgName, buildId);
+            LogFunctionCall("KustoPluginVNext.QueryKustoAsync", clusterKey, query.Substring(0, 10) + "...");
 
-            var pullRequests = await KustoHelper.RetrievePullRequestsByBuildIdAsync(orgName, buildId, clusterKey, cancellationToken).ConfigureAwait(false);
-            LogJson("Tool", pullRequests);
+            if (!ValidateClusterKey(clusterKey, out var cluster, out var errorResponse))
+            {
+                return errorResponse!;
+            }
 
-            return string.IsNullOrEmpty(pullRequests) ? $"No pull requests found for Org: {orgName} and BuildId: {buildId}" : pullRequests;
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return CreateErrorResponse("The 'query' parameter cannot be null or empty.");
+            }
+
+            try
+            {
+                var result = await KustoHelper
+                    .ExecuteKustoQueryAsync(cluster!.Uri, cluster.DatabaseName, query, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                return ProcessQueryResult(result);
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "An error occurred while executing the Kusto query.");
+                return CreateErrorResponse("An internal error occurred while executing the query.");
+            }
+        }
+
+        [KernelFunction]
+        [Description("This function is dedicated to capturing and logging ideas for Kusto functions that could aid in making query planning more efficient. The entries will accumulate useful functions that could be referenced in future development. Any time you have a kernal function idea that could save steps in the plan you should save it by wrapping QueryKustoDatabaseAsync you should propose it. You should always consider if you want to save any feedback after running a kusto query.")]
+        public async Task<string> SaveKustoFunction(
+            [Description("The name of the Kusto function to save.")] string functionName,
+            [Description("The function definition/query.")] string functionDefinition,
+            [Description("Boolean flag indicating whether to append to the existing log. Default is true.")]
+            bool append = true,
+            CancellationToken cancellationToken = default)
+        {
+            LogFunctionCall("KustoPluginVNext.SaveKustoFunction", functionName, functionDefinition);
+
+            try
+            {
+                // Prepare the log entry with timestamp and function details
+                var logEntry = $"{DateTime.UtcNow}: Function Name: {functionName}\nDefinition:\n{functionDefinition}\n";
+
+                // Use StreamWriter to append the function details to the log file
+                using (var writer = new StreamWriter(KustoFunctionsLogPath, append))
+                {
+                    await writer.WriteLineAsync(logEntry);
+                }
+
+                return "Kusto function saved successfully.";
+            }
+            catch (Exception ex)
+            {
+                // Log error details (You could log to another file or system here)
+                return $"Error while saving Kusto function: {ex.Message}";
+            }
         }
 
         /// <summary>
@@ -201,15 +180,10 @@
         /// </summary>
         private static string ProcessQueryResult(string result)
         {
-            const int tokenLimit = 120000;
-            if (result.Length / 4 > tokenLimit)
+            if (TryTokenLimit(result))
             {
                 Logger.LogMessage($"Response is too large. Considering how we should proceed. Result length: {result.Length}", ConsoleColor.DarkGreen);
-                return JsonSerializer.Serialize(new
-                {
-                    message = $"The response length was {result.Length} characters and exceeded the token limit.",
-                    suggestions = value
-                }, new JsonSerializerOptions { WriteIndented = true });
+                return string.Join("\n", tokenLimitExceededSuggstions);
             }
 
             return result ?? "No results found.";
@@ -222,7 +196,10 @@
         /// <param name="cluster">The retrieved cluster configuration.</param>
         /// <param name="errorResponse">The error response if validation fails.</param>
         /// <returns>True if the cluster key is valid; otherwise, false.</returns>
-        private bool ValidateClusterKey(string clusterKey, out KustoClusterConfig? cluster, out string? errorResponse)
+        private bool ValidateClusterKey(
+            string clusterKey,
+            out KustoClusterConfig? cluster,
+            out string? errorResponse)
         {
             if (string.IsNullOrWhiteSpace(clusterKey))
             {
@@ -246,7 +223,8 @@
         /// </summary>
         /// <param name="message">The error message.</param>
         /// <returns>A JSON string representing the error response.</returns>
-        private static string CreateErrorResponse(string message)
+        private static new string CreateErrorResponse(
+            string message)
             => JsonSerializer.Serialize(
                 new { error = true, message },
                 new JsonSerializerOptions { WriteIndented = true });
@@ -256,7 +234,9 @@
         /// </summary>
         /// <param name="functionName">Name of the function being called.</param>
         /// <param name="args">Arguments passed to the function.</param>
-        private void LogFunctionCall(string functionName, params string[] args)
+        private protected new void LogFunctionCall(
+            string functionName,
+            params string[] args)
             => Logger.LogFunctionCall($"KustoPluginVNext.{functionName}", args);
 
         /// <summary>
@@ -264,7 +244,7 @@
         /// </summary>
         /// <param name="label">Label for the JSON data.</param>
         /// <param name="data">The data to log.</param>
-        private void LogJson(string label, string data)
+        private protected new void LogJson(string label, string data)
             => Logger.LogJson(label, data);
 
         /// <summary>
@@ -282,5 +262,59 @@
         /// <param name="color">The color to use for the message.</param>
         private void LogMessage(string message, ConsoleColor color)
             => Logger.LogMessage(message, color);
+
+        /// <summary>
+        /// Tries to determine if the result exceeds the token limit.
+        /// 
+        /// The estimation formula for token limit is: length / 4
+        /// We use 5 as a multiplier to account for the additional characters in the JSON response.
+        /// 
+        /// 
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns>Determinant if the result exceeds the token limit.</returns>
+        private static bool TryTokenLimit(string result)
+        {
+            const int tokenLimit = 120000;
+
+            return result.Length / 5 > tokenLimit;
+        }
+
+        public override string Help() => throw new NotImplementedException();
+
+        [Serializable]
+        private class TokenLimitException : Exception
+        {
+            public TokenLimitException()
+            {
+            }
+
+            public TokenLimitException(string? message) : base(message)
+            {
+            }
+
+            public TokenLimitException(string? message, Exception? innerException) : base(message, innerException)
+            {
+            }
+        }
+
+        /// <summary>
+        /// Represents the configuration details of a Kusto cluster.
+        /// </summary>
+        private class KustoClusterConfig
+        {
+            public string Key { get; }
+            public string Uri { get; }
+            public string DatabaseName { get; }
+            public string Description { get; }
+
+            public KustoClusterConfig(string key, string uri, string databaseName, string description)
+            {
+                Key = key;
+                Uri = uri;
+                DatabaseName = databaseName;
+                Description = description;
+            }
+        }
     }
 }

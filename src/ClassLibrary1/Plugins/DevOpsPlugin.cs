@@ -13,7 +13,7 @@
     /// such as builds, work items, commits, and pull requests associated 
     /// with a specific organization and build ID.
     /// </summary>
-    public class DevOpsPlugin : PluginBase
+    public class DevOpsPlugin : KustoPlugin
     {
         private const string DefaultClusterKey = "azuredevops"; // Assuming DevOpsPlugin uses the 'azuredevops' cluster by default
 
@@ -239,7 +239,5 @@
             LogInfo("DevOpsPlugin.Help", "Help information provided successfully.");
             return result;
         }
-
-        public override Task<string> ExecuteAsync(params string[] parameters) => throw new NotImplementedException();
     }
 }
