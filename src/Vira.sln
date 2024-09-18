@@ -5,6 +5,8 @@ VisualStudioVersion = 17.12.35209.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureCore.ReadyToDeploy.Vira", "ClassLibrary1\Microsoft.AzureCore.ReadyToDeploy.Vira.csproj", "{1719DAFB-7A5C-41BB-B6B6-87FC5F1B5D80}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureCore.ReadyToDeploy.Vira.Tests", "Microsoft.AzureCore.ReadyToDeploy.Vira.Tests\Microsoft.AzureCore.ReadyToDeploy.Vira.Tests.csproj", "{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1719DAFB-7A5C-41BB-B6B6-87FC5F1B5D80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1719DAFB-7A5C-41BB-B6B6-87FC5F1B5D80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1719DAFB-7A5C-41BB-B6B6-87FC5F1B5D80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AE4B96D-9149-4AC8-89C1-C004DAB37C13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

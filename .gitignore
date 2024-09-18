@@ -6,3 +6,5 @@
 /src/ClassLibrary1/bin/Debug/net8.0
 /src/ClassLibrary1/obj/Debug/net8.0
 /src/ClassLibrary1/obj
+/src/Microsoft.AzureCore.ReadyToDeploy.Vira.Tests/obj
+/src/Microsoft.AzureCore.ReadyToDeploy.Vira.Tests/bin/Debug/net8.0
