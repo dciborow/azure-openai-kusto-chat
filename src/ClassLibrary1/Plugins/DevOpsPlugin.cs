@@ -74,38 +74,6 @@
             => await ExecuteAndLogQueryAsync("BuildChange", orgName, buildId, "No commits found", cancellationToken);
 
         /// <summary>
-        /// Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.
-        /// </summary>
-        [KernelFunction("get_pull_requests_by_build")]
-        [Description("Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.")]
-        [return: Description("Returns the pull requests associated with the build in JSON format or a message if no pull requests are found.")]
-        public async Task<string> GetPullRequestsByBuildAsync(
-            [Description("The name of the organization (e.g., 'msazure').")] string orgName,
-            [Description("The build ID to look up.")] string buildId,
-            CancellationToken cancellationToken = default)
-        {
-            LogFunctionCall("DevOpsPlugin.GetPullRequestsByBuildAsync", orgName, buildId);
-
-            try
-            {
-                var pullRequests = await KustoHelper
-                    .RetrievePullRequestsByBuildIdAsync(orgName, buildId, DefaultClusterKey, cancellationToken)
-                    .ConfigureAwait(false);
-
-                LogJson("Tool", pullRequests);
-
-                return string.IsNullOrEmpty(pullRequests)
-                    ? $"No pull requests found for Org: {orgName} and BuildId: {buildId}"
-                    : pullRequests;
-            }
-            catch (Exception ex)
-            {
-                LogError("DevOpsPlugin.GetPullRequestsByBuildAsync", $"An error occurred while retrieving pull requests: {ex.Message}");
-                return CreateErrorResponse("An internal error occurred while retrieving pull requests.");
-            }
-        }
-
-        /// <summary>
         /// Central method to handle execution and logging for simple queries.
         /// </summary>
         private async Task<string> ExecuteAndLogQueryAsync(
