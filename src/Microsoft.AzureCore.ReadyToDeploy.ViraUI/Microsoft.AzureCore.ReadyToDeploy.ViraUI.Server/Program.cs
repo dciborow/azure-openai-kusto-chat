@@ -1,8 +1,11 @@
 
 namespace Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server;
 
+using System.Reflection;
+
 using Microsoft.AzureCore.ReadyToDeploy.Vira;
 using Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server.Hubs;
+using Microsoft.OpenApi.Models;
 
 public class Program
 {
@@ -19,7 +22,25 @@ public class Program
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        // Configure Swagger with annotations
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "SemanticKernelPlugin API", Version = "v1" });
+
+            // Include XML comments if you have them
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                c.IncludeXmlComments(xmlPath);
+            }
+
+            // Enable annotations
+            c.EnableAnnotations();
+
+            // Optionally, set operationId generation strategy
+            c.CustomOperationIds(apiDesc => apiDesc.ActionDescriptor.RouteValues["action"]);
+        });
 
         var app = builder.Build();
 
