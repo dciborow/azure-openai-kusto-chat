@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira
 {
     using global::Microsoft.SemanticKernel;
     using global::Microsoft.SemanticKernel.ChatCompletion;
@@ -25,6 +25,8 @@
 
             builder.Plugins.AddFromType<ClearwaterPlugin>();
             builder.Plugins.AddFromType<DevOpsPlugin>();
+            builder.Plugins.AddFromType<CosmosDBPlugin>();
+            builder.Plugins.AddFromType<AISearchPlugin>();
 
             _kernel = builder.Build();
 
