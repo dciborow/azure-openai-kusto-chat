@@ -61,6 +61,6 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers
         /// <summary>
         /// Logs an informational message with details.
         /// </summary>
-        public static void LogInfo(string message) => LogMessage($"Info: {message}", ConsoleColor.Green);
+        public static void LogInfo(string message) => LogMessage($"Info: {message}", ConsoleColor.Cyan);
     }
 }
