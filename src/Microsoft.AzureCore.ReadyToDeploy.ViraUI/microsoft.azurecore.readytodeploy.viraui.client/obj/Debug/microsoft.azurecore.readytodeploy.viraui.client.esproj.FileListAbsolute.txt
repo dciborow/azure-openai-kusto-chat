@@ -1,1 +1,0 @@
-F:\git\azure-openai-kusto-chat\src\Microsoft.AzureCore.ReadyToDeploy.ViraUI\microsoft.azurecore.readytodeploy.viraui.client\obj\Debug\microsoft.azurecore.readytodeploy.viraui.client.esproj.CoreCompileInputs.cache

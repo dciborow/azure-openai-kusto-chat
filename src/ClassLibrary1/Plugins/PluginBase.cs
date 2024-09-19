@@ -19,7 +19,7 @@
         /// </summary>
         /// <param name="functionName">The name of the function being called.</param>
         /// <param name="arguments">A variable number of arguments passed to the function.</param>
-        protected void LogFunctionCall(string functionName, params string[] arguments)
+        protected static void LogFunctionCall(string functionName, params string[] arguments)
         {
             // Implement your logging logic here. For example:
             // Logger.LogFunctionCall(functionName, arguments);
@@ -33,7 +33,7 @@
         /// </summary>
         /// <param name="label">A label describing the JSON data.</param>
         /// <param name="jsonData">The JSON data to log.</param>
-        protected void LogJson(string label, string jsonData)
+        protected static void LogJson(string label, string jsonData)
         {
             // Implement your logging logic here. For example:
             // Logger.LogJson(label, jsonData);
@@ -47,7 +47,7 @@
         /// </summary>
         /// <param name="context">Contextual information about where the error occurred.</param>
         /// <param name="message">The error message to log.</param>
-        protected void LogError(string context, string message)
+        protected static void LogError(string context, string message)
         {
             // Implement your logging logic here. For example:
             // Logger.LogError(context, message);
@@ -61,7 +61,7 @@
         /// </summary>
         /// <param name="context">Contextual information about where the log is coming from.</param>
         /// <param name="message">The informational message to log.</param>
-        protected void LogInfo(string context, string message)
+        protected static void LogInfo(string context, string message)
         {
             // Implement your logging logic here. For example:
             // Logger.LogInfo(context, message);
@@ -75,7 +75,7 @@
         /// </summary>
         /// <param name="message">The error message.</param>
         /// <returns>A JSON string representing the error response.</returns>
-        protected string CreateErrorResponse(string message) =>
+        protected static string CreateErrorResponse(string message) =>
             JsonSerializer.Serialize(new { error = true, message }, new JsonSerializerOptions { WriteIndented = true });
     }
 }

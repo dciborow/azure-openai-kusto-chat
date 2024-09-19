@@ -14,17 +14,14 @@
 
     public class KustoPlugin : PluginBase
     {
-        private const string KustoFunctionsLogPath = "kusto_functions.log";
-
         private readonly Dictionary<string, KustoClusterConfig> _clusters;
-        private static readonly string[] tokenLimitExceededSuggestions = new[]
-                    {
-                        "try again after choosing important columns from the schema and select them using ' | project'.",
-                        "Use 'kusto_query_count' to determine the number of results in your previous query.",
-                        "If the issue continues, add a 'take' statement or decrease the number of rows taken if it was already included.",
-                    };
+        private static readonly string[] tokenLimitExceededSuggestions =
+            [
+                "try again after choosing important columns from the schema and select them using ' | project'.",
+                "Use 'kusto_query_count' to determine the number of results in your previous query.",
+                "If the issue continues, add a 'take' statement or decrease the number of rows taken if it was already included.",
+            ];
 
-        // Constructor that initializes clusters with unique keys
         public KustoPlugin()
         {
             _clusters = new()
@@ -40,7 +37,7 @@
         [KernelFunction("kusto_query_best_practices")]
         [Description("Should always run this step before using kusto_query. Retrieve a set of Kusto Best Practices that can be used before running a kusto query.")]
         [return: Description("Returns the list of best practices to follow when writing kusto queries.")]
-        public string KustoBestPractices()
+        public static string KustoBestPractices()
         {
             LogFunctionCall("KustoPluginVNext.KustoBestPractices");
 
@@ -90,15 +87,15 @@
             if (!ValidateClusterKey(clusterKey, out var cluster, out var errorResponse))
             {
                 LogMessage($"Cluster with key '{clusterKey}' not found.", ConsoleColor.Red);
-                return errorResponse;
+                return errorResponse ?? $"Cluster with key '{clusterKey}' not found.";
             }
 
-            string query = $".show database {cluster.DatabaseName} cslschema";
+            string query = $".show database {cluster?.DatabaseName} cslschema";
 
             try
             {
                 var result = await KustoHelper
-                    .ExecuteKustoQueryAsync(cluster.Uri, cluster.DatabaseName, query, cancellationToken: cancellationToken)
+                    .ExecuteKustoQueryAsync(cluster!.Uri, cluster.DatabaseName, query, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
                 LogJson("### Tool", result);
 
@@ -251,7 +248,7 @@
         [Description("Creates a Kusto table in the r2d database.")]
         [return: Description("Returns a JSON string indicating success or an error message.")]
 
-        public async Task<string> CreateTableAsync(
+        public static async Task<string> CreateTableAsync(
             string createTableCommand,
             CancellationToken cancellationToken = default)
         {
@@ -329,7 +326,7 @@
         /// </summary>
         /// <param name="functionName">Name of the function being called.</param>
         /// <param name="args">Arguments passed to the function.</param>
-        private protected new void LogFunctionCall(
+        private protected new static void LogFunctionCall(
             string functionName,
             params string[] args)
             => LoggerHelper.LogFunctionCall($"KustoPluginVNext.{functionName}", args);
@@ -339,7 +336,7 @@
         /// </summary>
         /// <param name="label">Label for the JSON data.</param>
         /// <param name="data">The data to log.</param>
-        private protected new void LogJson(string label, string data)
+        private protected new static void LogJson(string label, string data)
             => LoggerHelper.LogJson(label, data);
 
         /// <summary>
@@ -347,7 +344,7 @@
         /// </summary>
         /// <param name="ex">The exception that was thrown.</param>
         /// <param name="context">Contextual information about where the error occurred.</param>
-        private void LogError(Exception ex, string context)
+        private static void LogError(Exception ex, string context)
             => LoggerHelper.LogError($"Error in KustoPluginVNext: {context} - {ex.Message}");
 
         /// <summary>
@@ -355,7 +352,7 @@
         /// </summary>
         /// <param name="message">The message to log.</param>
         /// <param name="color">The color to use for the message.</param>
-        private void LogMessage(string message, ConsoleColor color)
+        private static void LogMessage(string message, ConsoleColor color)
             => LoggerHelper.LogMessage(message, color);
 
         /// <summary>

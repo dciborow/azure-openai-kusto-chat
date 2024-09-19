@@ -17,6 +17,7 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "microsoft.azurecore.readyto
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FAFE77B0-4D8A-482E-910E-FCDB210CC9F5}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		..\.gitignore = ..\.gitignore
 	EndProjectSection
 EndProject

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+13b231a901e04e7cec975ad7aa52b544e1469a91")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1e49be0997b7161d02b05c0b676903123e0fc72b")]
 [assembly: System.Reflection.AssemblyProductAttribute("Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

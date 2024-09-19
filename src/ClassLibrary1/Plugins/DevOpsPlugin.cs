@@ -23,7 +23,7 @@
         [KernelFunction("get_pull_requests_by_build")]
         [Description("Retrieves Pull Requests linked to a specific build by performing a join between BuildChange and PullRequest.")]
         [return: Description("Returns the pull requests associated with the build in JSON format or a message if no pull requests are found.")]
-        public async Task<string> GetPullRequestsByBuildAsync(
+        public static async Task<string> GetPullRequestsByBuildAsync(
             [Description("Key of the Kusto cluster to query (e.g., 'azuredevops', 'safefly', etc.).")] string clusterKey,
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId,
@@ -43,7 +43,7 @@
         [KernelFunction("get_build_info")]
         [Description("Retrieves build information by organization name and build ID.")]
         [return: Description("Returns the build information as a JSON string or a message if no build is found.")]
-        public async Task<string> GetBuildInfoAsync(
+        public static async Task<string> GetBuildInfoAsync(
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId,
             CancellationToken cancellationToken = default)
@@ -55,7 +55,7 @@
         [KernelFunction("get_workitem_by_org_build")]
         [Description("Retrieves work items linked to a specific build.")]
         [return: Description("Returns the work items associated with the build in JSON format or a message if no work items are found.")]
-        public async Task<string> GetWorkItemsByBuildAsync(
+        public static async Task<string> GetWorkItemsByBuildAsync(
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId,
             CancellationToken cancellationToken = default)
@@ -67,7 +67,7 @@
         [KernelFunction("get_commits_by_org_build")]
         [Description("Retrieves commits linked to a specific build.")]
         [return: Description("Returns the commits associated with the build in JSON format or a message if no commits are found.")]
-        public async Task<string> GetCommitsByBuildAsync(
+        public static async Task<string> GetCommitsByBuildAsync(
             [Description("The name of the organization (e.g., 'msazure').")] string orgName,
             [Description("The build ID to look up.")] string buildId,
             CancellationToken cancellationToken = default)
@@ -76,7 +76,7 @@
         /// <summary>
         /// Central method to handle execution and logging for simple queries.
         /// </summary>
-        private async Task<string> ExecuteAndLogQueryAsync(
+        private static async Task<string> ExecuteAndLogQueryAsync(
             string tableName,
             string orgName,
             string buildId,

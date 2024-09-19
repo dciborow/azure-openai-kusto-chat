@@ -191,7 +191,7 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
         /// </summary>
         /// <param name="functionName">Name of the function being called.</param>
         /// <param name="args">Arguments passed to the function.</param>
-        private new void LogFunctionCall(string functionName, params string[] args) =>
+        private new static void LogFunctionCall(string functionName, params string[] args) =>
             LoggerHelper.LogFunctionCall($"GitHubPlugin.{functionName}", args);
 
         /// <summary>
@@ -199,14 +199,14 @@ namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
         /// </summary>
         /// <param name="label">Label for the JSON data.</param>
         /// <param name="data">The data to log.</param>
-        private new void LogJson(string label, string data) =>
+        private new static void LogJson(string label, string data) =>
             LoggerHelper.LogJson(label, data);
 
         /// <summary>
         /// Logs an error with exception details.
         /// </summary>
         /// <param name="message">The error message.</param>
-        private void LogError(string message) =>
+        private static void LogError(string message) =>
             LoggerHelper.LogError(message);
 
         public override string Help() => throw new NotImplementedException();

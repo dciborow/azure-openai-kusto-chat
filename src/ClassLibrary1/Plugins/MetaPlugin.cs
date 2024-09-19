@@ -17,7 +17,7 @@
         [KernelFunction("read_file")]
         [Description("Reads the content of a specified file and returns it as a string. Used to help determine what updates can be made to files to help resolve issues.")]
         [return: Description("Returns the content of the file as a string.")]
-        public async Task<string> ReadFileAsync(
+        public static async Task<string> ReadFileAsync(
         [Description("The full path of the file to read, including the filename and extension.")] string filePath,
         CancellationToken cancellationToken = default)
         {

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "vTg9QqZIwps=",
+  "dgSpecHash": "fsmL50qulk8=",
   "success": true,
   "projectFilePath": "F:\\git\\azure-openai-kusto-chat\\src\\Microsoft.AzureCore.ReadyToDeploy.ViraUI\\Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server\\Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server.csproj",
   "expectedPackageFiles": [
@@ -82,6 +82,7 @@
     "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.semantickernel.core\\1.19.0\\microsoft.semantickernel.core.1.19.0.nupkg.sha512",
     "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.teamfoundation.distributedtask.common.contracts\\19.225.1\\microsoft.teamfoundation.distributedtask.common.contracts.19.225.1.nupkg.sha512",
     "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.teamfoundationserver.client\\19.225.1\\microsoft.teamfoundationserver.client.19.225.1.nupkg.sha512",
+    "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.typescript.msbuild\\5.6.2\\microsoft.typescript.msbuild.5.6.2.nupkg.sha512",
     "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.visualstudio.services.client\\19.225.1\\microsoft.visualstudio.services.client.19.225.1.nupkg.sha512",
     "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\dciborow\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",

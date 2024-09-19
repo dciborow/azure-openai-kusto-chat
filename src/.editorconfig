@@ -1,0 +1,7 @@
+﻿[*.{cs,vb}]
+
+# IDE0300: Simplify collection initialization
+dotnet_diagnostic.IDE0300.severity = error
+
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = error

@@ -12,7 +12,7 @@
         [KernelFunction("safefly_query_best_practices")]
         [Description("Should always use this step before using lookup_safefly_requests_kusto. This contains helpful information that should be considered before querying SafeFly with Kusto.")]
         [return: Description("Returns the list of best practices to follow when writing kusto queries for SafeFly.")]
-        public string SafeFlyBestPractices()
+        public static string SafeFlyBestPractices()
         {
             LogFunctionCall("SafeFlyPlugin.SafeFlyBestPractices");
 
