@@ -11,7 +11,7 @@
         /// <summary>
         /// Logs a function call with the given arguments.
         /// </summary>
-        public static void LogFunctionCall(string functionName, params string[] args) => LogMessage($"Assistant (function call): {functionName}({string.Join(", ", args)})", ConsoleColor.DarkRed);
+        public static void LogFunctionCall(string functionName, params string[] args) => LogMessage($"# Assistant (function call): {functionName}({string.Join(", ", args)})", ConsoleColor.DarkRed);
 
         /// <summary>
         /// Logs JSON data without truncation.

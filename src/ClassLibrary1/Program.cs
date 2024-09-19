@@ -19,11 +19,13 @@
             var chatService = new ClearwaterChatService(deploymentName, endpoint);
 
             // REPL loop for interactive chat
-            Console.WriteLine("Welcome to the Clearwater Chat REPL! Try asking me about ADO Org Build Id. Type 'exit' to quit.");
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("\t\t\t\tWelcome to the Clearwater Chat REPL! Try asking me about ADO Org Build Id. Type 'exit' to quit.");
 
             while (true)
             {
                 Console.ResetColor();
+                Console.WriteLine(lineSeperator);
                 Console.Write("You: ");
                 string userInput = Console.ReadLine()!;
 
@@ -32,11 +34,19 @@
                     break;
                 }
 
+                Console.WriteLine(lineSeperator);
+
                 var response = await chatService.GetChatResponseAsync("user", userInput!);
 
                 Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(lineSeperator);
+
                 Console.WriteLine("Assistant > " + response);
+                Console.WriteLine(lineSeperator + "\n");
+
             }
         }
+
+        private static readonly string lineSeperator = "==============================================================================================================================================";
     }
 }

@@ -10,6 +10,8 @@
     using Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers;
     using Microsoft.SemanticKernel;
 
+    using static Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers.KustoHelper;
+
     public class KustoPlugin : PluginBase
     {
         private const string KustoFunctionsLogPath = "kusto_functions.log";
@@ -25,11 +27,13 @@
         // Constructor that initializes clusters with unique keys
         public KustoPlugin()
         {
-            _clusters = new Dictionary<string, KustoClusterConfig>
+            _clusters = new()
             {
                 { "safefly", new KustoClusterConfig("safefly", "https://safeflycluster.westus.kusto.windows.net/", "safefly", "Deployment Requests linked with Build ID") },
                 { "copilot", new KustoClusterConfig("copilot", "https://az-copilot-kusto.eastus.kusto.windows.net/", "copilotDevFeedback", "Copilot Risk reports for SafeFly requests based on compared builds of sequential requests") },
-                { "azuredevops", new KustoClusterConfig("azuredevops", "https://1es.kusto.windows.net/", "AzureDevOps", "Contains Builds, Pull Requests, Commits, and Work Items") }
+                { "azuredevops", new KustoClusterConfig("azuredevops", "https://1es.kusto.windows.net/", "AzureDevOps", "Contains Builds, Pull Requests, Commits, and Work Items") },
+                { "appinsights", new KustoClusterConfig("appinsights",  "https://ade.applicationinsights.io/subscriptions/ee58f296-1bd7-4fee-bf69-daa9e2d7cec2/resourcegroups/ADOCopilotRG/providers/microsoft.insights/components/CopilotADO", "CopilotADO", "Contains Log Information for our application") },
+                { "r2d", new KustoClusterConfig("r2d", "https://az-copilot-kusto.eastus.kusto.windows.net/", "r2d", "The R2D Kusto Cluster may be used to save functions for later use.") },
             };
         }
 
@@ -45,6 +49,7 @@
     Semantic error: 'summarize' operator: Failed to resolve scalar expression named
     Semantic error: 'project' operator: Failed to resolve scalar expression named
 2. If you have trouble finding a specific value, check the distinct values of the column
+3. you may not cast values during joins
 ";
         }
 
@@ -66,7 +71,7 @@
             }
 
             var result = JsonSerializer.Serialize(databases, new JsonSerializerOptions { WriteIndented = true });
-            LogJson("Tool", result);
+            LogJson("### Tool", result);
             return result;
         }
 
@@ -95,7 +100,7 @@
                 var result = await KustoHelper
                     .ExecuteKustoQueryAsync(cluster.Uri, cluster.DatabaseName, query, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                LogJson("Tool", result);
+                LogJson("### Tool", result);
 
                 return result ?? CreateErrorResponse("No tables found.");
             }
@@ -144,37 +149,126 @@
             }
         }
 
-        [KernelFunction]
-        [Description("This function is dedicated to capturing and logging ideas for Kusto functions that could aid in making query planning more efficient. The entries will accumulate useful functions that could be referenced in future development. Any time you have a kernal function idea that could save steps in the plan you should save it by wrapping QueryKustoDatabaseAsync you should propose it. You should always consider if you want to save any feedback after running a kusto query.")]
-        public async Task<string> SaveKustoFunction(
-            [Description("The name of the Kusto function to save.")] string functionName,
-            [Description("The function definition/query.")] string functionDefinition,
-            [Description("Boolean flag indicating whether to append to the existing log. Default is true.")]
-            bool append = true,
+        [KernelFunction("list_kusto_functions")]
+        [Description("Lists kusto functions that have been previously saved by Copilot. Check these to help simplify kusto queries.")]
+        /// <summary>
+        /// Retrieves a list of functions in the specified Kusto cluster.
+        /// </summary>
+        /// <param name="clusterKey">The key of the Kusto cluster to query.</param>
+        /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+        /// <returns>A JSON-formatted string containing the list of functions.</returns>
+        public async Task<string> ListKustoFunctionsAsync(
+            string clusterKey,
+            [Description("An optional filter for function names. If provided, only functions whose names contain this filter will be returned. Injected as | where Name contains '{functionNameFilter}'")] string? functionNameFilter = null,
             CancellationToken cancellationToken = default)
         {
-            LogFunctionCall("KustoPluginVNext.SaveKustoFunction", functionName, functionDefinition);
+            LogFunctionCall("KustoPluginVNext.ListKustoFunctionsAsync", clusterKey);
+
+            if (!ValidateClusterKey(clusterKey, out var cluster, out var errorResponse))
+            {
+                LogMessage($"Cluster with key '{clusterKey}' not found.", ConsoleColor.Red);
+                return errorResponse!;
+            }
+
+            string query = ".show functions";
+
+            if (!string.IsNullOrWhiteSpace(functionNameFilter))
+            {
+                query += $" | where Name contains '{functionNameFilter}'";
+            }
 
             try
             {
-                // Prepare the log entry with timestamp and function details
-                var logEntry = $"{DateTime.UtcNow}: Function Name: {functionName}\nDefinition:\n{functionDefinition}\n";
+                var result = await KustoHelper
+                    .ExecuteKustoQueryAsync(
+                        cluster!.Uri,
+                        cluster.DatabaseName,
+                        query,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                LogJson("### Tool", result);
 
-                // Use StreamWriter to append the function details to the log file
-                using (var writer = new StreamWriter(KustoFunctionsLogPath, append))
-                {
-                    await writer.WriteLineAsync(logEntry);
-                }
-
-                return "Kusto function saved successfully.";
+                return result ?? CreateErrorResponse("No functions found.");
             }
             catch (Exception ex)
             {
-                // Log error details (You could log to another file or system here)
-                return $"Error while saving Kusto function: {ex.Message}";
+                LogError(ex, "An error occurred while retrieving the list of functions.");
+                return CreateErrorResponse("An internal error occurred while retrieving the list of functions.");
             }
         }
 
+        /// <summary>
+        /// Creates a Kusto function in the specified database based on the complete function definition provided.
+        /// </summary>
+        /// <param name="clusterKey">The key of the Kusto cluster where the function will be created.</param>
+        /// <param name="functionDefinition">The entire Kusto command for creating the function, including .create function syntax.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>A JSON-formatted string indicating success or an error message.</returns>
+        [KernelFunction("create_kusto_function")]
+        [Description("Creates a Kusto function in the specified database based on the complete function definition provided.")]
+
+        public async Task<string> CreateKustoFunctionAsync(
+            [Description("The entire Kusto command for creating the function, including .create function syntax.")] string functionDefinition,
+            CancellationToken cancellationToken = default)
+        {
+            LogFunctionCall($"KustoPluginVNext.CreateKustoFunction({functionDefinition})");
+            var clusterKey = "r2d";
+
+            if (!ValidateClusterKey(clusterKey, out var cluster, out var errorResponse))
+            {
+                return errorResponse!;
+            }
+
+            if (string.IsNullOrWhiteSpace(functionDefinition) ||
+                !functionDefinition.Trim().StartsWith(".create function", StringComparison.OrdinalIgnoreCase) || !functionDefinition.Trim().StartsWith(".alter function", StringComparison.OrdinalIgnoreCase))
+            {
+                return CreateErrorResponse("Invalid function definition. Ensure it begins with '.create function'.");
+            }
+
+            try
+            {
+                var result = await KustoHelper
+                    .ExecuteAdminCommandAsync(
+                        cluster!.Uri,
+                        cluster.DatabaseName,
+                        functionDefinition,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                return ProcessQueryResult(result);
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "An error occurred while creating the Kusto function.");
+                return CreateErrorResponse("An internal error occurred while creating the Kusto function.");
+            }
+        }
+        /// <summary>
+        /// Creates a table in the specified Kusto database with the provided command.
+        /// We will only allow admin commands to our 'r2d' database.
+        /// </summary>
+        /// [KernelFunction("create_kusto_function")]
+        [Description("Creates a Kusto table in the r2d database.")]
+        [return: Description("Returns a JSON string indicating success or an error message.")]
+
+        public async Task<string> CreateTableAsync(
+            string createTableCommand,
+            CancellationToken cancellationToken = default)
+        {
+            LogFunctionCall("KustoPluginVNext.CreateTableAsync");
+            var clusterKey = "r2d";
+
+            if (string.IsNullOrWhiteSpace(createTableCommand) ||
+                !createTableCommand.Trim().StartsWith(".create table", StringComparison.OrdinalIgnoreCase))
+            {
+                return CreateErrorResponse("Invalid create table command. Ensure it begins with '.create table'.");
+            }
+
+            string clusterUri = GetClusterUri(clusterKey);
+            string databaseName = clusterKey;
+
+            return await ExecuteAdminCommandAsync(clusterUri, databaseName, createTableCommand, cancellationToken);
+        }
         /// <summary>
         /// Processes the query result and checks if it exceeds a token limit, providing
         /// suggestions for modifying the query if necessary.
@@ -296,25 +390,6 @@
 
             public TokenLimitException(string? message, Exception? innerException) : base(message, innerException)
             {
-            }
-        }
-
-        /// <summary>
-        /// Represents the configuration details of a Kusto cluster.
-        /// </summary>
-        private class KustoClusterConfig
-        {
-            public string Key { get; }
-            public string Uri { get; }
-            public string DatabaseName { get; }
-            public string Description { get; }
-
-            public KustoClusterConfig(string key, string uri, string databaseName, string description)
-            {
-                Key = key;
-                Uri = uri;
-                DatabaseName = databaseName;
-                Description = description;
             }
         }
     }
