@@ -24,7 +24,6 @@ within the file for "TODO".
 ======================================================================================
 ====================================================================================-->
 
-
 <!---------------------[  Description  ]------------------<recommended> section below------------------>
 
 # steps
@@ -71,7 +70,6 @@ How to Evaluate & Examples:
 *Description of how to install and use the code or content goes here*
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[ Prerequisites  ]-----------------<optional> section below--------------------->
 ### Prerequisites
 
@@ -87,7 +85,6 @@ How to Evaluate & Examples:
 There are no prerequisites required to run this code or use this repository.
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[  Installing  ]-------------------<optional> section below------------------>
 ### Installing
 
@@ -102,7 +99,6 @@ How to Evaluate & Examples:
 <!---- [TODO]  CONTENT GOES BELOW ------->
 This repository does not hold installable content.
 <!------====-- CONTENT GOES ABOVE ------->
-
 
 <!-----------------------[  Tests  ]------------------------<optional> section below--------------------->
 <!-- 
@@ -129,7 +125,6 @@ Give an example
 -->
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[  Deployment (CI/CD)  ]-----------<optional> section below--------------------->
 ### Deployment (CI/CD)
 
@@ -149,7 +144,6 @@ How to Evaluate & Examples:
 _At this time, the repository does not use continuous integration or produce a website, artifact, or anything deployed._
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[  Versioning and Changelog  ]-----<optional> section below--------------------->
 
 <!-- ### Versioning and Changelog -->
@@ -166,7 +160,6 @@ How to Evaluate & Examples:
 <!---- [TODO]  CONTENT GOES BELOW ------->
 <!-- We use [SemVer](https://aka.ms/StartRight/README-Template/semver) for versioning. -->
 <!------====-- CONTENT GOES ABOVE ------->
-
 
 -----------------------------------------------
 
@@ -185,11 +178,9 @@ How to Evaluate & Examples:
   - https://aka.ms/StartRight/README-Template/Instructions#how-to-share-an-accessible-link-to-this-repository
 -->
 
-
 <!---- [TODO]  CONTENT GOES BELOW ------->
 
 <!------====-- CONTENT GOES ABOVE ------->
-
 
 <!-----------------------[  Contributing  ]-----------------<recommended> section below------------------>
 ## Contributing
@@ -216,7 +207,6 @@ it useful to read these [tips & tricks](https://aka.ms/StartRight/README-Templat
 on InnerSource Communication.
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[  Contacts  ]---------------------<recommended> section below------------------>
 <!-- 
 #### Contacts  
@@ -233,11 +223,10 @@ How to Evaluate & Examples:
 
 <!------====-- CONTENT GOES ABOVE ------->
 
-
 <!-----------------------[  Support & Reuse Expectations  ]-----<recommended> section below-------------->
  
 ### Support & Reuse Expectations
-
+ 
  
 <!-- 
 INSTRUCTIONS:
@@ -250,13 +239,12 @@ How to Evaluate & Examples:
 -->
 
 <!---- [TODO]  CONTENT GOES BELOW ------->
-
+ 
 _The creators of this repository **DO NOT EXPECT REUSE**._
-
+ 
 If you do use it, please let us know via an email or 
 leave a note in an issue, so we can best understand the value of this repository.
 <!------====-- CONTENT GOES ABOVE ------->
-
 
 <!-----------------------[  Limitations  ]----------------------<optional> section below----------------->
 
@@ -283,7 +271,6 @@ How to Evaluate & Examples:
 
 --------------------------------------------
 
-
 <!-----------------------[  Links to Platform Policies  ]-------<recommended> section below-------------->
 ## How to Accomplish Common User Actions
 <!-- 
@@ -308,3 +295,81 @@ This README started as a template provided as part of the
 [README template](https://aka.ms/StartRight/README-Template) used in this repository is requested as an issue. 
 
 <!-- version: 2023-04-07 [Do not delete this line, it is used for analytics that drive template improvements] -->
+
+## Cosmos DB Plugin
+
+### Prerequisites
+
+1. **Azure Cosmos DB Account**: Ensure you have an Azure Cosmos DB account. You can create one [here](https://portal.azure.com/#create/Microsoft.CosmosDB).
+2. **.NET SDK**: You need .NET 6.0 or higher installed on your system. You can download it [here](https://dotnet.microsoft.com/download).
+
+### Installing
+
+To install the Cosmos DB plugin, follow these steps:
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-repo/azure-openai-kusto-chat.git
+cd azure-openai-kusto-chat
+```
+
+2. Add the Cosmos DB plugin to your project:
+
+```bash
+dotnet add package Microsoft.Azure.Cosmos
+```
+
+3. Update your project file to include the Cosmos DB plugin:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.19.0" />
+</ItemGroup>
+```
+
+4. Initialize the Cosmos DB plugin in your code:
+
+```csharp
+var cosmosDbPlugin = new CosmosDBPlugin();
+await cosmosDbPlugin.InitializeAsync("<your-endpoint-uri>", "<your-primary-key>", "<your-database-id>", "<your-container-id>");
+```
+
+## AI Search Plugin
+
+### Prerequisites
+
+1. **Azure AI Search Account**: Ensure you have an Azure AI Search account. You can create one [here](https://portal.azure.com/#create/Microsoft.Search).
+2. **.NET SDK**: You need .NET 6.0 or higher installed on your system. You can download it [here](https://dotnet.microsoft.com/download).
+
+### Installing
+
+To install the AI Search plugin, follow these steps:
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-repo/azure-openai-kusto-chat.git
+cd azure-openai-kusto-chat
+```
+
+2. Add the AI Search plugin to your project:
+
+```bash
+dotnet add package Microsoft.SemanticKernel.Connectors.AzureAISearch --prerelease
+```
+
+3. Update your project file to include the AI Search plugin:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureAISearch" Version="1.0.0-preview" />
+</ItemGroup>
+```
+
+4. Initialize the AI Search plugin in your code:
+
+```csharp
+var aiSearchPlugin = new AISearchPlugin();
+await aiSearchPlugin.InitializeAsync("<your-endpoint>", "<your-api-key>", "<your-index-name>");
+```
