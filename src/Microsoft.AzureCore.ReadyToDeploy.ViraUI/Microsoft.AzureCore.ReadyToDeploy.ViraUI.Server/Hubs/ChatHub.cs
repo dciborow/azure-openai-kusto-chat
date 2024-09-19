@@ -13,6 +13,8 @@ public class ChatHub : Hub
     {
         _chatService = chatService;
     }
+    public async Task NewMessage(string user, string message)
+        => await Clients.All.SendAsync("messageReceived", user, message);
 
     public async Task SendMessage(string userInput)
     {

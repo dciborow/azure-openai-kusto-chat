@@ -17,6 +17,7 @@
             string endpoint = "https://gpt-review.openai.azure.com";
 
             var chatService = new ClearwaterChatService(deploymentName, endpoint);
+            var chatService2 = new ClearwaterChatService(deploymentName, endpoint);
 
             // REPL loop for interactive chat
             Console.ForegroundColor = ConsoleColor.Magenta;
@@ -37,16 +38,17 @@
                 Console.WriteLine(lineSeperator);
 
                 var response = await chatService.GetChatResponseAsync("user", userInput!);
+                var cleanedResponse = await chatService2.GetChatResponseAsync("user", $"See if you can improve the previous response before we send it to the user, only respond with the updated text. \n\nQuestion: {userInput!}, Answer:{response}");
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(lineSeperator);
 
-                Console.WriteLine("Assistant > " + response);
+                Console.WriteLine("Assistant > " + cleanedResponse);
                 Console.WriteLine(lineSeperator + "\n");
 
             }
         }
 
-        private static readonly string lineSeperator = "==============================================================================================================================================";
+        private static readonly string lineSeperator = "\t\t==================================================================================================================================";
     }
 }

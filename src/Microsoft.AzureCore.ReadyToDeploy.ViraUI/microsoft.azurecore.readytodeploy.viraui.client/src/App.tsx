@@ -1,13 +1,18 @@
-import { Stack, Text } from '@fluentui/react';
-import Chat from './components/Chat';
-
+import React, { useEffect, useState } from 'react';
+import './App.css';
+import Connector from './signalr-connection'
 function App() {
+    const { newMessage, events } = Connector();
+    const [message, setMessage] = useState("initial value");
+    useEffect(() => {
+        events((_, message) => setMessage(message));
+    });
     return (
-        <Stack tokens={{ childrenGap: 15 }} styles={{ root: { margin: '20px' } }}>
-            <Text variant="xxLarge">Vira Chat</Text>
-            <Chat />
-        </Stack>
+        <div className="App">
+            <span>message from signalR: <span style={{ color: "green" }}>{message}</span> </span>
+            <br />
+            <button onClick={() => newMessage((new Date()).toISOString())}>send date </button>
+        </div>
     );
 }
-
 export default App;

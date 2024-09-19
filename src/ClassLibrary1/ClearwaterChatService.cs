@@ -48,16 +48,25 @@
             };
 
             var chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
-            var result = await chatCompletionService.GetChatMessageContentAsync(
-                _chatHistory,
-                executionSettings: openAIPromptExecutionSettings,
-                kernel: _kernel
-            );
 
-            // Add assistant's response to the chat history
-            _chatHistory.AddAssistantMessage(result.Content!);
+            try
+            {
+                var result = await chatCompletionService.GetChatMessageContentAsync(
+                    _chatHistory,
+                    executionSettings: openAIPromptExecutionSettings,
+                    kernel: _kernel
+                );
 
-            return result.Content!;
+                _chatHistory.AddAssistantMessage(result.Content!);
+
+                return result.Content!;
+            }
+            catch (Exception)
+            {
+                // Log the exception and return a generic error message
+                _chatHistory.AddAssistantMessage("I'm sorry, I encountered an error while processing your request. Please try again later.");
+                return "I'm sorry, I encountered an error while processing your request. Please try again later.";
+            }
         }
 
 #pragma warning disable SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
