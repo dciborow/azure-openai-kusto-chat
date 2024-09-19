@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Plugins
 {
     using System;
     using System.ComponentModel;

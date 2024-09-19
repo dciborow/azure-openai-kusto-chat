@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers
+namespace Microsoft.AzureCore.ReadyToDeploy.Vira.Helpers
 {
     using System;
     using System.Text.Json;
@@ -57,5 +57,10 @@
         /// Logs an error message with details.
         /// </summary>
         public static void LogError(string message) => LogMessage($"Error: {message}", ConsoleColor.Red);
+
+        /// <summary>
+        /// Logs an informational message with details.
+        /// </summary>
+        public static void LogInfo(string message) => LogMessage($"Info: {message}", ConsoleColor.Green);
     }
 }
