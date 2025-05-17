@@ -97,7 +97,16 @@
         /// <param name="command">The Kusto administrative command to execute.</param>
         /// <param name="cancellationToken">A cancellation token for managing the asynchronous operation.</param>
         /// <returns>A JSON string indicating success or an error message.</returns>
-        internal static async Task<string> ExecuteAdminCommandAsync(
+        internal static Func<string, string, string, CancellationToken, Task<string>> ExecuteAdminCommandAsyncFunc { get; set; } = RealExecuteAdminCommandAsync;
+
+        internal static Task<string> ExecuteAdminCommandAsync(
+            string clusterUri,
+            string databaseName,
+            string command,
+            CancellationToken cancellationToken = default)
+            => ExecuteAdminCommandAsyncFunc(clusterUri, databaseName, command, cancellationToken);
+
+        private static async Task<string> RealExecuteAdminCommandAsync(
             string clusterUri,
             string databaseName,
             string command,
