@@ -217,9 +217,10 @@
             }
 
             if (string.IsNullOrWhiteSpace(functionDefinition) ||
-                !functionDefinition.Trim().StartsWith(".create function", StringComparison.OrdinalIgnoreCase) || !functionDefinition.Trim().StartsWith(".alter function", StringComparison.OrdinalIgnoreCase))
+                !(functionDefinition.Trim().StartsWith(".create function", StringComparison.OrdinalIgnoreCase) ||
+                  functionDefinition.Trim().StartsWith(".alter function", StringComparison.OrdinalIgnoreCase)))
             {
-                return CreateErrorResponse("Invalid function definition. Ensure it begins with '.create function'.");
+                return CreateErrorResponse("Invalid function definition. Ensure it begins with '.create function' or '.alter function'.");
             }
 
             try
