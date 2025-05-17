@@ -42,7 +42,7 @@ dotnet run
 
 Try this series of prompts.
 ```
-I have some questons... 1) What tables in Safefly's Kusto contain information about Safefly requests? 2) What can you tell me about the most recent records for the SafeFly request 4254 from the r2d partition? 3)  Can you use the ADO Build ID there to look up more information about the build?
+I have some questions... 1) What tables in Safefly's Kusto contain information about Safefly requests? 2) What can you tell me about the most recent records for the SafeFly request 4254 from the r2d partition? 3)  Can you use the ADO Build ID there to look up more information about the build?
 ```
 
 #### 3.1 Single Script
@@ -61,12 +61,12 @@ dotnet run
 
 # Now, try these prompts one at a time or all together:
 #
-# I have some questons...
-# - What tables in Safefly's Kusto contain information about Safefly requests?`
-# - What can you tell me about the most recent records for the SafeFly request 4254 from the r2d partition?`
-# - `Can you use the ADO Build ID there to look up more information about the build?`
+# I have some questions...
+# - What tables in Safefly's Kusto contain information about Safefly requests?
+# - What can you tell me about the most recent records for the SafeFly request 4254 from the r2d partition?
+# - Can you use the ADO Build ID there to look up more information about the build?
 #
-# I have some questons... 1) What tables in Safefly's Kusto contain information about Safefly requests? 2) What can you tell me about the most recent records for the SafeFly request 4254 from the r2d partition? 3)  Can you use the ADO Build ID there to look up more information about the build?
+# I have some questions... 1) What tables in Safefly's Kusto contain information about Safefly requests? 2) What can you tell me about the most recent records for the SafeFly request 4254 from the r2d partition? 3)  Can you use the ADO Build ID there to look up more information about the build?
 ```
 
 ### 4. Development
