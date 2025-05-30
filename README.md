@@ -308,3 +308,38 @@ This README started as a template provided as part of the
 [README template](https://aka.ms/StartRight/README-Template) used in this repository is requested as an issue. 
 
 <!-- version: 2023-04-07 [Do not delete this line, it is used for analytics that drive template improvements] -->
+
+## CosmosDB Browser
+
+This project includes a simple browser for CosmosDB records using Aspire.dont and React.
+
+### How to Use the CosmosDB Browser
+
+1. Clone the repository and navigate to the project directory.
+2. Install the necessary dependencies by running `npm install`.
+3. Start the development server by running `npm start`.
+4. Open your browser and navigate to `http://localhost:3000` to access the CosmosDB browser.
+
+### Example Usage
+
+The `CosmosDBBrowser` component is used to display CosmosDB records in a table format. Here is an example of how to use it:
+
+```jsx
+import React from 'react';
+import CosmosDBBrowser from './components/CosmosDBBrowser';
+
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>Welcome to CosmosDB Browser</h1>
+      </header>
+      <main>
+        <CosmosDBBrowser />
+      </main>
+    </div>
+  );
+}
+
+export default App;
+```
