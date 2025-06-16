@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server.Controllers
+namespace Microsoft.AzureCore.ReadyToDeploy.ViraUI.Server.Controllers
 {
     using System.Threading.Tasks;
 
